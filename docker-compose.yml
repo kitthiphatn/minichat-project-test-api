@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mini-chat-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: mini-chat-ollama
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+    networks:
+      - mini-chat-network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  mini-chat-network:
+    driver: bridge
