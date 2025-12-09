@@ -1,4 +1,5 @@
 # 🤖 Mini Chat Ollama
+# TEST CHAT https://chat.clubfivem.com/
 
 A modern, full-stack chat application with support for multiple AI providers including Ollama, OpenRouter, Groq, and Anthropic. Built with Next.js 14, Express.js, and MongoDB.
 
