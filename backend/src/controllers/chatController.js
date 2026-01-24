@@ -8,23 +8,28 @@ const PROVIDERS = {
     ollama: {
         name: 'Ollama (Local)',
         endpoint: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
-        models: ['llama3', 'llama3:70b', 'mistral', 'codellama', 'phi3', 'gemma'],
+        models: ['llama3', 'mistral', 'phi3', 'gemma'],
     },
     openrouter: {
         name: 'OpenRouter',
         endpoint: 'https://openrouter.ai/api/v1/chat/completions',
         models: [
+            'google/gemini-pro-1.5',
+            'google/gemini-flash-1.5',
             'meta-llama/llama-3-8b-instruct',
             'meta-llama/llama-3-70b-instruct',
             'mistralai/mistral-7b-instruct',
-            'google/gemini-pro',
             'anthropic/claude-3-haiku',
         ],
     },
     groq: {
         name: 'Groq',
         endpoint: 'https://api.groq.com/openai/v1/chat/completions',
-        models: ['llama3-8b-8192', 'llama3-70b-8192', 'mixtral-8x7b-32768', 'gemma-7b-it'],
+        models: [
+            'llama-3.1-8b-instant',
+            'llama-3.3-70b-versatile',
+            'mixtral-8x7b-32768',
+        ],
     },
     anthropic: {
         name: 'Anthropic',
@@ -40,13 +45,16 @@ async function callOllama(messages, model) {
     const startTime = Date.now();
 
     try {
+        const url = `${PROVIDERS.ollama.endpoint}/api/chat`;
+        const requestData = {
+            model: model,
+            messages: messages,
+            stream: false,
+        };
+
         const response = await axios.post(
-            `${PROVIDERS.ollama.endpoint}/api/chat`,
-            {
-                model: model,
-                messages: messages,
-                stream: false,
-            },
+            url,
+            requestData,
             {
                 headers: {
                     'Content-Type': 'application/json',
@@ -64,9 +72,14 @@ async function callOllama(messages, model) {
         };
     } catch (error) {
         console.error('[ERROR] Ollama API call failed:', error.message);
+        if (error.response) {
+            console.error('[ERROR] Response status:', error.response.status);
+            console.error('[ERROR] Response data:', error.response.data);
+        }
         throw new Error(`Ollama error: ${error.message}`);
     }
 }
+
 
 /**
  * Call OpenRouter API
@@ -197,14 +210,37 @@ async function callAnthropic(messages, model) {
 
 /**
  * Get available providers
- * Checks which API keys are configured
+ * Checks which API keys are configured and fetches available Ollama models
  */
 exports.getProviders = async (req, res) => {
     try {
+        // Fetch available Ollama models dynamically
+        let ollamaModels = ['llama3', 'mistral', 'phi3', 'gemma']; // Default fallback
+        let ollamaAvailable = true;
+
+        try {
+            const ollamaResponse = await axios.get(`${PROVIDERS.ollama.endpoint}/api/tags`, {
+                timeout: 3000,
+            });
+
+            if (ollamaResponse.data && ollamaResponse.data.models) {
+                // Extract model names from Ollama API response
+                ollamaModels = ollamaResponse.data.models.map(m => {
+                    // Remove ':latest' suffix for cleaner display
+                    return m.name.replace(':latest', '');
+                });
+                console.log('[INFO] Fetched Ollama models:', ollamaModels);
+            }
+        } catch (ollamaError) {
+            console.warn('[WARN] Could not fetch Ollama models, using defaults:', ollamaError.message);
+            ollamaAvailable = false;
+        }
+
         const providers = {
             ollama: {
                 ...PROVIDERS.ollama,
-                available: true, // Ollama is always available if running
+                models: ollamaModels,
+                available: ollamaAvailable,
             },
             openrouter: {
                 ...PROVIDERS.openrouter,
@@ -232,8 +268,14 @@ exports.getProviders = async (req, res) => {
  */
 exports.getChatHistory = async (req, res) => {
     try {
-        const { sessionId = 'default', limit = 50 } = req.query;
+        // Get sessionId from header
+        const sessionId = req.headers['x-session-id'];
 
+        if (!sessionId) {
+            return res.status(400).json({ error: 'Session ID is required' });
+        }
+
+        const { limit = 50 } = req.query;
         const messages = await Message.getChatHistory(sessionId, parseInt(limit));
 
         res.json({ messages });
@@ -248,7 +290,14 @@ exports.getChatHistory = async (req, res) => {
  */
 exports.sendMessage = async (req, res) => {
     try {
-        const { message, provider = 'ollama', model = 'llama3', sessionId = 'default' } = req.body;
+        // Get sessionId from header
+        const sessionId = req.headers['x-session-id'];
+
+        if (!sessionId) {
+            return res.status(400).json({ error: 'Session ID is required' });
+        }
+
+        const { message, provider = 'ollama', model = 'llama3' } = req.body;
 
         // Validate input
         if (!message || typeof message !== 'string') {
@@ -278,10 +327,21 @@ exports.sendMessage = async (req, res) => {
         const history = await Message.getChatHistory(sessionId, 10);
 
         // Format messages for AI API
-        const formattedMessages = history.map(msg => ({
+        let formattedMessages = history.map(msg => ({
             role: msg.role === 'ai' ? 'assistant' : 'user',
             content: msg.content,
         }));
+
+        // Add system prompt for Ollama to ensure Thai responses
+        if (provider === 'ollama') {
+            formattedMessages = [
+                {
+                    role: 'system',
+                    content: 'ตรวจสอบภาษาของคำถาม: ถ้าเป็นภาษาอังกฤษล้วนๆ ให้ตอบเป็นภาษาอังกฤษ แต่ถ้ามีภาษาไทยปนอยู่ หรือเป็นภาษาไทยทั้งหมด ให้ตอบเป็นภาษาไทยเท่านั้น'
+                },
+                ...formattedMessages
+            ];
+        }
 
         // Call appropriate AI provider
         let aiResponse;
@@ -353,7 +413,12 @@ exports.sendMessage = async (req, res) => {
  */
 exports.clearChat = async (req, res) => {
     try {
-        const { sessionId = 'default' } = req.body;
+        // Get sessionId from header
+        const sessionId = req.headers['x-session-id'];
+
+        if (!sessionId) {
+            return res.status(400).json({ error: 'Session ID is required' });
+        }
 
         const result = await Message.clearHistory(sessionId);
 

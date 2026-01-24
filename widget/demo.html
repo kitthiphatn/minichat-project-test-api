@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniChat Widget Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .demo-container {
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .feature-list li {
+            padding: 12px 0;
+            color: #555;
+            font-size: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .feature-list li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .cta {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .note {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            border-left: 4px solid #667eea;
+        }
+
+        .note strong {
+            color: #667eea;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="demo-container">
+        <h1>💬 MiniChat Widget Demo</h1>
+        <p class="subtitle">ทดสอบ Chatbox Widget ที่สามารถฝังในเว็บไซต์ใดก็ได้</p>
+
+        <ul class="feature-list">
+            <li>UI สวยงาม responsive ทุกอุปกรณ์</li>
+            <li>เชื่อมต่อ MiniChat API โดยตรง</li>
+            <li>รองรับภาษาไทยและอังกฤษ</li>
+            <li>Typing indicator แบบ real-time</li>
+            <li>Chat history ที่บันทึกอัตโนมัติ</li>
+            <li>Minimize/Maximize ได้สะดวก</li>
+        </ul>
+
+        <div class="cta">
+            👉 ลองคลิกปุ่มแชทมุมขวาล่าง!
+        </div>
+
+        <div class="note">
+            <strong>📝 หมายเหตุ:</strong> Widget นี้เชื่อมต่อกับ MiniChat API ที่ <code>http://localhost:5000</code>
+            ตรวจสอบให้แน่ใจว่า Backend กำลังรันอยู่
+        </div>
+    </div>
+
+    <!-- Load MiniChat Widget -->
+    <script src="minichat-widget.html"></script>
+</body>
+
+</html>

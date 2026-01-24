@@ -1,11 +1,34 @@
 import axios from 'axios';
 
+/**
+ * Generate or retrieve session ID
+ * Each browser gets a unique session ID stored in localStorage
+ */
+const getSessionId = () => {
+    let sessionId = localStorage.getItem('chatSessionId');
+    if (!sessionId) {
+        // Generate UUID v4
+        sessionId = crypto.randomUUID();
+        localStorage.setItem('chatSessionId', sessionId);
+        console.log('[INFO] New session created:', sessionId);
+    }
+    return sessionId;
+};
+
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
     headers: {
         'Content-Type': 'application/json',
     },
     timeout: 60000,
+});
+
+// Add session ID to all requests
+api.interceptors.request.use(config => {
+    config.headers['X-Session-ID'] = getSessionId();
+    return config;
+}, error => {
+    return Promise.reject(error);
 });
 
 /**
@@ -23,15 +46,12 @@ export const getProviders = async () => {
 };
 
 /**
- * Get chat history for a session
- * @param {String} sessionId - Session identifier
+ * Get chat history for current session
  * @returns {Promise<Array>} Array of messages
  */
-export const getChatHistory = async (sessionId = 'default') => {
+export const getChatHistory = async () => {
     try {
-        const response = await api.get('/chat/history', {
-            params: { sessionId },
-        });
+        const response = await api.get('/chat/history');
         return response.data.messages;
     } catch (error) {
         console.error('Failed to get chat history:', error);
@@ -44,16 +64,14 @@ export const getChatHistory = async (sessionId = 'default') => {
  * @param {String} message - User message
  * @param {String} provider - AI provider
  * @param {String} model - AI model
- * @param {String} sessionId - Session identifier
  * @returns {Promise<Object>} User and AI messages
  */
-export const sendMessage = async (message, provider, model, sessionId = 'default') => {
+export const sendMessage = async (message, provider, model) => {
     try {
         const response = await api.post('/chat/message', {
             message,
             provider,
             model,
-            sessionId,
         });
         return response.data;
     } catch (error) {
@@ -63,15 +81,12 @@ export const sendMessage = async (message, provider, model, sessionId = 'default
 };
 
 /**
- * Clear chat history
- * @param {String} sessionId - Session identifier
+ * Clear chat history for current session
  * @returns {Promise<Object>} Deletion result
  */
-export const clearChat = async (sessionId = 'default') => {
+export const clearChat = async () => {
     try {
-        const response = await api.post('/chat/clear', {
-            sessionId,
-        });
+        const response = await api.post('/chat/clear');
         return response.data;
     } catch (error) {
         console.error('Failed to clear chat:', error);

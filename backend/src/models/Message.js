@@ -27,7 +27,7 @@ const messageSchema = new mongoose.Schema(
         },
         sessionId: {
             type: String,
-            default: 'default',
+            required: [true, 'Session ID is required'],
             index: true,
         },
         metadata: {

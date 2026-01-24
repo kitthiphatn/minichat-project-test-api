@@ -1,0 +1,18 @@
+tunnel: d26fba95-f796-45e3-96dd-7e0b3bbd867a
+credentials-file: C:\Users\Marke\.cloudflared\d26fba95-f796-45e3-96dd-7e0b3bbd867a.json
+
+ingress:
+  # Minichat Frontend
+  - hostname: chat.clubfivem.com
+    service: http://localhost:3000
+  
+  # Minichat Backend API (เพิ่มใหม่)
+  - hostname: api.clubfivem.com
+    service: http://localhost:5001
+  
+  # POS System service
+  - hostname: pos.clubfivem.com
+    service: http://localhost:8080
+  
+  # Catch-all rule (required)
+  - service: http_status:404

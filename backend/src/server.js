@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5000;
  * Middleware
  */
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: true, // Allow all origins on local network
     credentials: true,
 }));
 
@@ -41,20 +41,28 @@ app.get('/health', (req, res) => {
  * API Routes
  */
 app.use('/api/chat', chatRoutes);
+app.use('/api/auth', require('./routes/auth'));
 
 /**
  * Root Endpoint
  */
 app.get('/', (req, res) => {
     res.json({
-        message: 'Mini Chat Ollama API',
+        message: 'MiniChat SaaS API',
         version: '1.0.0',
         endpoints: {
             health: '/health',
-            providers: '/api/chat/providers',
-            history: '/api/chat/history',
-            message: '/api/chat/message',
-            clear: '/api/chat/clear',
+            auth: {
+                register: '/api/auth/register',
+                login: '/api/auth/login',
+                me: '/api/auth/me'
+            },
+            chat: {
+                providers: '/api/chat/providers',
+                history: '/api/chat/history',
+                message: '/api/chat/message',
+                clear: '/api/chat/clear',
+            }
         },
     });
 });
@@ -83,19 +91,22 @@ app.use((err, req, res, next) => {
 /**
  * Start Server
  */
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log('\n' + '='.repeat(60));
-    console.log('🤖  MINI CHAT OLLAMA - BACKEND SERVER');
+    console.log('🤖  MINI CHAT SAAS - BACKEND SERVER');
     console.log('='.repeat(60));
     console.log(`✓ Server running on http://localhost:${PORT}`);
     console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`✓ CORS enabled for: ${process.env.CORS_ORIGIN || 'http://localhost:3000'}`);
+    console.log(`✓ CORS enabled for: ALL`);
     console.log('\n📡 API Endpoints:');
-    console.log(`   GET  /health                - Health check`);
+    console.log(`   AUTH:`);
+    console.log(`   POST /api/auth/register     - Register new user`);
+    console.log(`   POST /api/auth/login        - Login`);
+    console.log(`   GET  /api/auth/me           - Get current user`);
+    console.log(`   CHAT:`);
     console.log(`   GET  /api/chat/providers    - Get available providers`);
     console.log(`   GET  /api/chat/history      - Get chat history`);
     console.log(`   POST /api/chat/message      - Send message`);
-    console.log(`   POST /api/chat/clear        - Clear chat`);
     console.log('\n' + '='.repeat(60) + '\n');
 });
 

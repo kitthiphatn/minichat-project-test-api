@@ -1,0 +1,22 @@
+{
+  "hooks": {
+    "stop": ".claude/hooks/ralph-stop.sh"
+  },
+  "ralphLoop": {
+    "enabled": true,
+    "maxIterations": 50,
+    "defaultCompletionPromise": "COMPLETE"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(python -m json.tool:*)",
+      "Bash(cd c:UsersMarkeDesktop\"\"minichat project \")",
+      "Bash(node test-auth.js:*)",
+      "Bash(node:*)",
+      "Bash(npm install:*)"
+    ]
+  }
+}
