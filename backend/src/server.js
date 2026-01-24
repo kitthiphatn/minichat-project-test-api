@@ -42,6 +42,7 @@ app.get('/health', (req, res) => {
  */
 app.use('/api/chat', chatRoutes);
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/workspaces', require('./routes/workspaces'));
 
 /**
  * Root Endpoint
