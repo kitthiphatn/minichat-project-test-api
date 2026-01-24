@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniChat Widget V2 - Dynamic Config</title>
+    <style>
+        :root {
+            --widget-color: #667eea;
+        }
+
+        .minichat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .minichat-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--widget-color) 0%, var(--widget-color) 100%);
+            filter: brightness(0.9);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .minichat-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .minichat-button svg {
+            width: 28px;
+            height: 28px;
+            fill: white;
+        }
+
+        .minichat-window {
+            display: none;
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 380px;
+            height: 600px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .minichat-window.open {
+            display: flex;
+        }
+
+        .minichat-header {
+            background: linear-gradient(135deg, var(--widget-color) 0%, var(--widget-color) 100%);
+            filter: brightness(0.9);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .minichat-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .minichat-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .minichat-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .minichat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f7fafc;
+        }
+
+        .minichat-message {
+            margin-bottom: 16px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .minichat-message.user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .minichat-message.bot {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .minichat-message-content {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .minichat-message.user .minichat-message-content {
+            background: var(--widget-color);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .minichat-message.bot .minichat-message-content {
+            background: white;
+            color: #2d3748;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .minichat-typing {
+            display: none;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 12px;
+            width: fit-content;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .minichat-typing.active {
+            display: block;
+        }
+
+        .minichat-typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .minichat-typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e0;
+            animation: typingDot 1.4s infinite;
+        }
+
+        .minichat-typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .minichat-typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingDot {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .minichat-input-area {
+            padding: 16px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .minichat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .minichat-input:focus {
+            border-color: var(--widget-color);
+        }
+
+        .minichat-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--widget-color);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .minichat-send:hover {
+            transform: scale(1.05);
+        }
+
+        .minichat-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .minichat-send svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .minichat-error {
+            padding: 12px;
+            background: #fed7d7;
+            color: #c53030;
+            font-size: 13px;
+            border-radius: 8px;
+            margin: 8px 16px;
+        }
+
+        .minichat-loading {
+            padding: 20px;
+            text-align: center;
+            color: #718096;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Widget Container -->
+    <div class="minichat-widget" id="minichatWidget" data-api-key="YOUR_API_KEY_HERE">
+        <!-- Chat Button -->
+        <button class="minichat-button" id="minichatButton">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+            </svg>
+        </button>
+
+        <!-- Chat Window -->
+        <div class="minichat-window" id="minichatWindow">
+            <div class="minichat-header">
+                <h3 id="minichatTitle">Loading...</h3>
+                <button class="minichat-close" id="minichatClose">&times;</button>
+            </div>
+
+            <div class="minichat-messages" id="minichatMessages">
+                <div class="minichat-loading">Initializing chat...</div>
+            </div>
+
+            <div class="minichat-input-area">
+                <input
+                    type="text"
+                    class="minichat-input"
+                    id="minichatInput"
+                    placeholder="Type your message..."
+                    disabled
+                >
+                <button class="minichat-send" id="minichatSend" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Get API key from data attribute
+            const widgetElement = document.getElementById('minichatWidget');
+            const API_KEY = widgetElement.getAttribute('data-api-key');
+
+            if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
+                console.error('[MiniChat] API key not provided. Please set data-api-key attribute.');
+                return;
+            }
+
+            // Configuration (will be loaded from API)
+            let CONFIG = {
+                apiUrl: 'http://localhost:5000/api', // Will be replaced
+                apiKey: API_KEY,
+                workspaceName: 'MiniChat',
+                welcomeMessage: 'Hi there! How can I help you today?',
+                widgetColor: '#667eea',
+                aiProvider: 'groq',
+                aiModel: 'llama-3.3-70b-versatile',
+                sessionId: 'widget-' + Math.random().toString(36).substr(2, 9)
+            };
+
+            // Load configuration from API
+            async function loadConfig() {
+                try {
+                    const response = await fetch(`${CONFIG.apiUrl}/widget/config`, {
+                        headers: {
+                            'x-api-key': API_KEY
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to load widget configuration');
+                    }
+
+                    const data = await response.json();
+                    if (data.success && data.config) {
+                        CONFIG = {
+                            ...CONFIG,
+                            workspaceName: data.config.workspaceName || CONFIG.workspaceName,
+                            welcomeMessage: data.config.welcomeMessage || CONFIG.welcomeMessage,
+                            widgetColor: data.config.widgetColor || CONFIG.widgetColor,
+                            aiProvider: data.config.aiProvider || CONFIG.aiProvider,
+                            aiModel: data.config.aiModel || CONFIG.aiModel
+                        };
+
+                        // Apply dynamic styles
+                        document.documentElement.style.setProperty('--widget-color', CONFIG.widgetColor);
+
+                        // Update title
+                        document.getElementById('minichatTitle').textContent = CONFIG.workspaceName;
+
+                        // Show welcome message
+                        addBotMessage(CONFIG.welcomeMessage);
+
+                        // Enable input
+                        document.getElementById('minichatInput').disabled = false;
+                        document.getElementById('minichatSend').disabled = false;
+
+                        console.log('[MiniChat] Widget configured successfully');
+                    }
+                } catch (error) {
+                    console.error('[MiniChat] Configuration error:', error);
+                    showError('Failed to initialize chat. Please check your API key.');
+                }
+            }
+
+            // DOM Elements
+            const button = document.getElementById('minichatButton');
+            const chatWindow = document.getElementById('minichatWindow');
+            const closeBtn = document.getElementById('minichatClose');
+            const input = document.getElementById('minichatInput');
+            const sendBtn = document.getElementById('minichatSend');
+            const messagesContainer = document.getElementById('minichatMessages');
+
+            // Toggle chat window
+            button.addEventListener('click', () => {
+                chatWindow.classList.toggle('open');
+                if (chatWindow.classList.contains('open')) {
+                    input.focus();
+                }
+            });
+
+            closeBtn.addEventListener('click', () => {
+                chatWindow.classList.remove('open');
+            });
+
+            // Send message on Enter key
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            sendBtn.addEventListener('click', sendMessage);
+
+            function addUserMessage(message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'minichat-message user';
+                messageDiv.innerHTML = `<div class="minichat-message-content">${escapeHtml(message)}</div>`;
+
+                // Remove loading message if exists
+                const loading = messagesContainer.querySelector('.minichat-loading');
+                if (loading) loading.remove();
+
+                messagesContainer.appendChild(messageDiv);
+                scrollToBottom();
+            }
+
+            function addBotMessage(message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'minichat-message bot';
+                messageDiv.innerHTML = `<div class="minichat-message-content">${escapeHtml(message)}</div>`;
+
+                // Remove loading message if exists
+                const loading = messagesContainer.querySelector('.minichat-loading');
+                if (loading) loading.remove();
+
+                messagesContainer.appendChild(messageDiv);
+                scrollToBottom();
+            }
+
+            function showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'minichat-message bot';
+                typingDiv.innerHTML = `
+                    <div class="minichat-typing active">
+                        <div class="minichat-typing-dots">
+                            <div class="minichat-typing-dot"></div>
+                            <div class="minichat-typing-dot"></div>
+                            <div class="minichat-typing-dot"></div>
+                        </div>
+                    </div>
+                `;
+                typingDiv.id = 'typingIndicator';
+                messagesContainer.appendChild(typingDiv);
+                scrollToBottom();
+            }
+
+            function hideTypingIndicator() {
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+
+            function showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'minichat-error';
+                errorDiv.textContent = message;
+                messagesContainer.appendChild(errorDiv);
+                scrollToBottom();
+            }
+
+            async function sendMessage() {
+                const message = input.value.trim();
+                if (!message) return;
+
+                addUserMessage(message);
+                input.value = '';
+                input.disabled = true;
+                sendBtn.disabled = true;
+
+                showTypingIndicator();
+
+                try {
+                    const response = await fetch(`${CONFIG.apiUrl}/chat/message`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': CONFIG.apiKey,
+                            'x-session-id': CONFIG.sessionId
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            provider: CONFIG.aiProvider,
+                            model: CONFIG.aiModel
+                        })
+                    });
+
+                    hideTypingIndicator();
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to send message');
+                    }
+
+                    const data = await response.json();
+
+                    if (data.response) {
+                        addBotMessage(data.response);
+                    } else {
+                        throw new Error('No response from AI');
+                    }
+                } catch (error) {
+                    console.error('[MiniChat] Error:', error);
+                    hideTypingIndicator();
+                    showError(error.message || 'Failed to get response. Please try again.');
+                } finally {
+                    input.disabled = false;
+                    sendBtn.disabled = false;
+                    input.focus();
+                }
+            }
+
+            function scrollToBottom() {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Initialize widget
+            loadConfig();
+        })();
+    </script>
+</body>
+</html>
