@@ -8,7 +8,7 @@ ingress:
   
   # Minichat Backend API (เพิ่มใหม่)
   - hostname: api.clubfivem.com
-    service: http://localhost:5001
+    service: http://localhost:5000
   
   # POS System service
   - hostname: pos.clubfivem.com

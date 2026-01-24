@@ -18,7 +18,8 @@
       "Bash(node:*)",
       "Bash(npm install:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nPhase 4 Complete: Widget Dynamic Configuration\n\nFrontend:\n- ✅ Widget V2 with dynamic config loading\n- ✅ Fetches configuration from /api/widget/config\n- ✅ API key authentication\n- ✅ Dynamic styling \\(custom colors\\)\n- ✅ Custom welcome message\n- ✅ Workspace-specific AI settings\n- ✅ Error handling and loading states\n- ✅ Session management\n\nFeatures:\n- Loads config on widget initialization  \n- Applies custom brand colors dynamically\n- Shows workspace name in header\n- Uses workspace AI provider/model settings\n- Automatic message counting via API\n- Beautiful typing indicators\n- Responsive design\n\nRalph Loop Progress: 10/13 phases complete\nCore MVP features: COMPLETE ✅\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nPhase 4 Complete: Widget Dynamic Configuration\n\nFrontend:\n- ✅ Widget V2 with dynamic config loading\n- ✅ Fetches configuration from /api/widget/config\n- ✅ API key authentication\n- ✅ Dynamic styling \\(custom colors\\)\n- ✅ Custom welcome message\n- ✅ Workspace-specific AI settings\n- ✅ Error handling and loading states\n- ✅ Session management\n\nFeatures:\n- Loads config on widget initialization  \n- Applies custom brand colors dynamically\n- Shows workspace name in header\n- Uses workspace AI provider/model settings\n- Automatic message counting via API\n- Beautiful typing indicators\n- Responsive design\n\nRalph Loop Progress: 10/13 phases complete\nCore MVP features: COMPLETE ✅\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(ls:*)"
     ]
   }
 }
