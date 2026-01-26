@@ -48,22 +48,37 @@ body {
 }
 
 /* Scrollbar styling */
-.chat-messages::-webkit-scrollbar {
-  width: 8px;
+/* Global Scrollbar Styling - Clean & Hidden Look */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* Optional: just make scrollbar invisible */
 }
 
-.chat-messages::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
+/* Optional: If you want a very thin, sleek scrollbar instead of completely hidden, uncomment below */
+/* 
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 20px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.8); 
+}
+*/
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-.chat-messages::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 10px;
-}
-
-.chat-messages::-webkit-scrollbar-thumb:hover {
-  background: #555;
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 /* Message bubble animations */

@@ -1,9 +1,5 @@
-import ChatInterface from '../components/ChatInterface';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-    return (
-        <main className="min-h-screen p-4">
-            <ChatInterface />
-        </main>
-    );
+    redirect('/dashboard');
 }

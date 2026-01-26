@@ -34,13 +34,16 @@ export default function GithubCallbackPage() {
                 if (response.data.success && response.data.token) {
                     setStatus('Login successful! Redirecting...');
 
-                    // Store token and user data
+                    // Store token, user, and workspace
                     localStorage.setItem('token', response.data.token);
                     localStorage.setItem('user', JSON.stringify(response.data.user));
+                    if (response.data.workspace) {
+                        localStorage.setItem('workspace', JSON.stringify(response.data.workspace));
+                    }
 
                     // Redirect to home after a brief delay
                     setTimeout(() => {
-                        router.push('/');
+                        router.push('/dashboard');
                     }, 1000);
                 } else {
                     // If response doesn't have success or token, treat as error

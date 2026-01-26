@@ -1,0 +1,16 @@
+[
+  {
+    "_id": "697588e416fb3b27762fb3d0",
+    "user": "696ee8047bee120f7af72e41",
+    "workspace": "696ee8047bee120f7af72e43",
+    "amount": 299,
+    "currency": "thb",
+    "status": "completed",
+    "provider": "mock",
+    "plan": "premium",
+    "billingPeriod": "monthly",
+    "createdAt": "2026-01-25T03:07:16.954Z",
+    "__v": 0,
+    "providerTransactionId": "mock_tx_1769310438970"
+  }
+]

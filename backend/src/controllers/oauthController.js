@@ -16,21 +16,31 @@ const generateToken = (id) => {
 const handleOAuthUser = async (email, username, provider, providerId, avatar) => {
     // 📝 NOTE (Logic):
     // 1. เช็คว่ามี Email นี้ในระบบไหม?
-    //    - มี: ถือว่า Login, อัพเดทข้อมูล Provider
+    //    - มี: ถือว่า Login, อัพเดทข้อมูล Provider (เชื่อมบัญชี)
     //    - ไม่มี: สร้าง User ใหม่ และสร้าง Workspace ให้ด้วย
+
     // 1. Check if user exists by email
     let user = await User.findOne({ email });
 
     if (user) {
-        // User exists
-        // If user was created with password (local), we might want to link or just login
-        // For now, we update the provider info if it's missing
-        if (!user.providerId) {
-            user.authProvider = provider;
-            user.providerId = providerId;
-            if (avatar) user.avatar = avatar;
-            await user.save();
+        // User exists - MERGE ACCOUNT
+        // ไม่สนว่า User เก่ามาจากไหน (Local/GitHub/Google) ให้เชื่อมโยงกันได้เลย
+
+        // ถ้า User นี้ยังไม่มี providerId (เช่นมาจาก Local) หรือมาจาก Provider อื่น
+        // เราจะ Update ข้อมูลล่าสุดลงไป (เช่น Avatar)
+        // แต่จะไม่ลบ Provider เดิม (ในอนาคตอาจจะเก็บเป็น Array ถ้าอยาก Support Multi-profile)
+
+        // อัพเดทให้รู้ว่าเขาล่าสุดเข้ามาด้วยช่องทางนี้
+        user.authProvider = provider;
+        user.providerId = providerId;
+
+        // ถ้ามีรูปใหม่และรูปเดิมว่างอยู่ ให้เติมรูป
+        if (avatar && !user.avatar) {
+            user.avatar = avatar;
         }
+
+        await user.save();
+
     } else {
         // 2. Create new user
         // Ensure username is unique (append random string if needed)

@@ -1,0 +1,11 @@
+﻿anthropic.claude-code
+github.codespaces
+github.copilot
+github.copilot-chat
+ms-azuretools.vscode-containers
+ms-python.debugpy
+ms-python.python
+ms-python.vscode-pylance
+ms-python.vscode-python-envs
+ms-vscode-remote.remote-containers
+postman.postman-for-vscode

@@ -52,9 +52,6 @@ const messageSchema = new mongoose.Schema(
 // Compound index for efficient session queries
 messageSchema.index({ sessionId: 1, createdAt: -1 });
 
-// Index for sorting by creation time
-messageSchema.index({ createdAt: -1 });
-
 /**
  * Static method to get chat history for a session
  * @param {String} sessionId - Session identifier
@@ -109,6 +106,8 @@ messageSchema.methods.toResponse = function () {
         updatedAt: this.updatedAt,
     };
 };
+
+messageSchema.index({ provider: 1, createdAt: -1 });
 
 const Message = mongoose.model('Message', messageSchema);
 

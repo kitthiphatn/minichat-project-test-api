@@ -1,12 +1,12 @@
-tunnel: d26fba95-f796-45e3-96dd-7e0b3bbd867a
-credentials-file: C:\Users\Marke\.cloudflared\d26fba95-f796-45e3-96dd-7e0b3bbd867a.json
+tunnel: 8535390b-7b23-462a-a0a9-ed59a11120e4
+credentials-file: /home/minipc/.cloudflared/8535390b-7b23-462a-a0a9-ed59a11120e4.json
 
 ingress:
   # Minichat Frontend
   - hostname: chat.clubfivem.com
     service: http://localhost:3000
   
-  # Minichat Backend API (เพิ่มใหม่)
+  # Minichat Backend API
   - hostname: api.clubfivem.com
     service: http://localhost:5000
   

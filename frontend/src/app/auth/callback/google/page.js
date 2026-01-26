@@ -35,12 +35,15 @@ export default function GoogleCallbackPage() {
                 if (response.data.success) {
                     setStatus('Login successful! Redirecting...');
 
-                    // Store token and user data
+                    // Store token, user, and workspace
                     localStorage.setItem('token', response.data.token);
                     localStorage.setItem('user', JSON.stringify(response.data.user));
+                    if (response.data.workspace) {
+                        localStorage.setItem('workspace', JSON.stringify(response.data.workspace));
+                    }
 
-                    // Redirect to home
-                    router.push('/');
+                    // Redirect to dashboard
+                    router.push('/dashboard');
                 }
             } catch (err) {
                 console.error('Google Login Error:', err);

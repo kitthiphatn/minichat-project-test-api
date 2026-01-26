@@ -1344,3 +1344,20 @@ Created by **[Your Name]** as a technical interview project.
 For quick setup, see [QUICKSTART.md](QUICKSTART.md)
 
 For project overview, see [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)
+
+## ⚠️ Hardware Limitations & Hybrid Mode
+
+**Note for Local Deployment:**
+This project relies on AI models that require significant computational power.
+- **Without Dedicated GPU**: Running Ollama local models (like Llama 3) on CPU-only machines (e.g., MiniPC, standard laptops) will be **extremely slow** (~20-30s per response).
+- **Hybrid Solution**: For low-spec hardware, we highly recommend switching to **Cloud Providers** (Groq, OpenRouter) which deliver near-instant responses (<1s) without burdening your local machine.
+
+## 🐧 Linux Migration Log (Jan 2026)
+
+This project has been migrated from Windows to Linux. Key changes include:
+- **Environment**: Updated `backend/.env` to support multiple CORS origins.
+- **Frontend**: Created `.env.production` to point to public domain APIs.
+- **Tunneling**: Reconfigured Cloudflare Tunnel ID and credentials for Linux paths.
+- **Database**: Restored user data from JSON backup.
+- **AI**: Switched default provider to **Groq** for performance optimization on non-GPU hardware.
+

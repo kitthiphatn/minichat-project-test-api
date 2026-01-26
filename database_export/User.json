@@ -1,0 +1,57 @@
+[
+  {
+    "_id": "696ee8047bee120f7af72e41",
+    "username": "ppdodoqq",
+    "email": "ktthiphat.n@gmail.com",
+    "password": "$2b$10$IWuawM1m5UA2yLfTk5B.3O1.Iak/kjnopb5C5dh1CnnGEcCBIQJtS",
+    "createdAt": "2026-01-20T02:27:16.546Z",
+    "__v": 0,
+    "authProvider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocL6T_c_ie6zLOSqCYE90C0ILWlPTli2-fJMMzS0wws3j7Gesw=s96-c",
+    "providerId": "108957038231363666051",
+    "role": "user"
+  },
+  {
+    "role": "user",
+    "_id": "696f56b16990363814cf725c",
+    "username": "karatanak",
+    "email": "kaaraat.anak@gmail.com",
+    "authProvider": "google",
+    "providerId": "100414826930072069801",
+    "avatar": "https://avatars.githubusercontent.com/u/104852308?v=4",
+    "createdAt": "2026-01-20T10:19:29.665Z",
+    "__v": 0,
+    "password": "$2b$10$kqH7p/dNkfS5O4K.cn2wruE1zxHW7cH0swyDjple0574MFt60KlGO"
+  },
+  {
+    "role": "user",
+    "_id": "697037de63f3fa5b58aede48",
+    "username": "CardeadKar Gim",
+    "email": "nonza115@gmail.com",
+    "authProvider": "google",
+    "providerId": "102131964651733958467",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLId4u64uwPaWbPNWctDL3zYlYPTGOuB80rtz7QM5U5SuK94xEw=s96-c",
+    "createdAt": "2026-01-21T02:20:14.274Z",
+    "__v": 0
+  },
+  {
+    "role": "user",
+    "_id": "697436b6e154885f5458f5b9",
+    "username": "testuser1769223862757",
+    "email": "test1769223862757@example.com",
+    "password": "$2b$10$nVZturYoIeHc.IOOpkFLWewVaYf2N/Yqv80y7jmTvIxPWKsALlgAS",
+    "authProvider": "local",
+    "createdAt": "2026-01-24T03:04:22.789Z",
+    "__v": 0
+  },
+  {
+    "_id": "6974fb805beba8a103a31b0c",
+    "username": "Bowling230",
+    "email": "bowlinge08@gmail.com",
+    "password": "$2b$10$R9Ybutnr0pmqoH0R5jUbGuzpPacjsxgj4RfrV05.7bWraU64BCwg2",
+    "authProvider": "local",
+    "role": "user",
+    "createdAt": "2026-01-24T17:04:00.250Z",
+    "__v": 0
+  }
+]

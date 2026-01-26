@@ -53,7 +53,8 @@ const workspaceSchema = new mongoose.Schema({
         },
         systemPrompt: {
             type: String,
-            default: 'You are a helpful AI assistant.'
+            default: 'You are a helpful AI assistant.',
+            maxlength: 500
         },
         widgetColor: {
             type: String,
@@ -62,6 +63,65 @@ const workspaceSchema = new mongoose.Schema({
         welcomeMessage: {
             type: String,
             default: 'Hi there! How can I help you today?'
+        },
+        botName: {
+            type: String,
+            default: 'Support Agent'
+        },
+        position: {
+            type: String,
+            enum: ['left', 'right'],
+            default: 'right'
+        },
+        logo: {
+            type: String,
+            default: ''
+        },
+        chatBackground: {
+            type: String,
+            default: ''
+        },
+        // General Settings
+        businessHours: {
+            enabled: { type: Boolean, default: false },
+            start: { type: String, default: '09:00' },
+            end: { type: String, default: '17:00' },
+            days: { type: [Number], default: [1, 2, 3, 4, 5] } // Mon-Fri
+        },
+        timezone: {
+            type: String,
+            default: 'Asia/Bangkok'
+        },
+        currency: {
+            type: String,
+            default: 'THB'
+        },
+        // Notification Settings
+        emailAlerts: {
+            newLead: { type: Boolean, default: true },
+            dailySummary: { type: Boolean, default: false }
+        },
+        soundEnabled: {
+            type: Boolean,
+            default: true
+        },
+        // Security Settings
+        security: {
+            pin: { type: String, default: null }, // Hashed PIN
+            pinLength: { type: Number, enum: [4, 6], default: 4 },
+            allowedDomains: [{ type: String }],
+            dataRetentionDays: { type: Number, default: 90 }, // 30, 60, 90, 365
+            requirePinForExport: { type: Boolean, default: true },
+            requirePinForDelete: { type: Boolean, default: true }
+        },
+        // Automation Settings
+        inactivityTimeout: {
+            type: Number,
+            default: 5 // Minutes
+        },
+        offlineMessage: {
+            type: String,
+            default: 'We are currently offline. We will get back to you during business hours!'
         }
     },
     createdAt: {
@@ -69,5 +129,9 @@ const workspaceSchema = new mongoose.Schema({
         default: Date.now
     }
 });
+
+workspaceSchema.index({ owner: 1 });
+workspaceSchema.index({ plan: 1 });
+workspaceSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('Workspace', workspaceSchema);

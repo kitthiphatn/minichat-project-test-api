@@ -216,8 +216,9 @@ exports.getProviders = async (req, res) => {
     try {
         // Fetch available Ollama models dynamically
         let ollamaModels = ['llama3', 'mistral', 'phi3', 'gemma']; // Default fallback
-        let ollamaAvailable = true;
+        let ollamaAvailable = false; // 📝 NOTE: Force disabled Ollama as per user request to use Groq only
 
+        /*
         try {
             const ollamaResponse = await axios.get(`${PROVIDERS.ollama.endpoint}/api/tags`, {
                 timeout: 3000,
@@ -235,6 +236,7 @@ exports.getProviders = async (req, res) => {
             console.warn('[WARN] Could not fetch Ollama models, using defaults:', ollamaError.message);
             ollamaAvailable = false;
         }
+        */
 
         const providers = {
             ollama: {

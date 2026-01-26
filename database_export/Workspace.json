@@ -1,0 +1,273 @@
+[
+  {
+    "usage": {
+      "messagesThisMonth": 0,
+      "messagesLimit": 250,
+      "resetDate": "2026-02-20T02:27:16.610Z"
+    },
+    "settings": {
+      "businessHours": {
+        "days": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "enabled": false,
+        "start": "09:00",
+        "end": "17:00"
+      },
+      "emailAlerts": {
+        "newLead": true,
+        "dailySummary": false
+      },
+      "security": {
+        "pin": "$2b$10$ouaw0hgzpZtm9R2ci7kGdexgkRT./KSX0dOeZki0ehBuKa/FWIxXe",
+        "pinLength": 4,
+        "allowedDomains": [],
+        "dataRetentionDays": 90,
+        "requirePinForExport": true,
+        "requirePinForDelete": true
+      },
+      "timezone": "Asia/Bangkok",
+      "currency": "THB",
+      "soundEnabled": true,
+      "allowedDomains": [],
+      "inactivityTimeout": 5,
+      "offlineMessage": "We are currently offline. We will get back to you soon!",
+      "aiProvider": "groq",
+      "aiModel": "llama-3.3-70b-versatile",
+      "systemPrompt": "",
+      "widgetColor": "#F43F5E",
+      "welcomeMessage": "",
+      "botName": "Support Agent 01",
+      "position": "right",
+      "logo": "/uploads/logo-696ee8047bee120f7af72e41-1769266671841-859884219.png",
+      "chatBackground": ""
+    },
+    "_id": "696ee8047bee120f7af72e43",
+    "name": "Micheal Workspace",
+    "owner": "696ee8047bee120f7af72e41",
+    "plan": "free",
+    "apiKey": "mc_addf0245a319ee0d0380cecb5d08087a",
+    "createdAt": "2026-01-20T02:27:16.610Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "messagesThisMonth": 0,
+      "messagesLimit": 250,
+      "resetDate": "2026-02-20T10:19:29.669Z"
+    },
+    "settings": {
+      "businessHours": {
+        "enabled": false,
+        "start": "09:00",
+        "end": "17:00",
+        "days": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "emailAlerts": {
+        "newLead": true,
+        "dailySummary": false
+      },
+      "security": {
+        "pin": null,
+        "pinLength": 4,
+        "allowedDomains": [],
+        "dataRetentionDays": 90,
+        "requirePinForExport": true,
+        "requirePinForDelete": true
+      },
+      "botName": "Support Agent",
+      "position": "right",
+      "logo": "",
+      "chatBackground": "",
+      "timezone": "Asia/Bangkok",
+      "currency": "THB",
+      "soundEnabled": true,
+      "inactivityTimeout": 5,
+      "offlineMessage": "We are currently offline. We will get back to you during business hours!",
+      "aiProvider": "groq",
+      "aiModel": "llama-3.3-70b-versatile",
+      "systemPrompt": "",
+      "widgetColor": "#37c01b",
+      "welcomeMessage": ""
+    },
+    "_id": "696f56b16990363814cf725e",
+    "name": "karatanak's Workspace",
+    "owner": "696f56b16990363814cf725c",
+    "plan": "free",
+    "apiKey": "mc_2c39dbc9651e482ad666d44af3fa3868",
+    "createdAt": "2026-01-20T10:19:29.669Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "messagesThisMonth": 0,
+      "messagesLimit": 250,
+      "resetDate": "2026-02-21T02:20:14.275Z"
+    },
+    "settings": {
+      "businessHours": {
+        "enabled": false,
+        "start": "09:00",
+        "end": "17:00",
+        "days": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "emailAlerts": {
+        "newLead": true,
+        "dailySummary": false
+      },
+      "security": {
+        "pin": null,
+        "pinLength": 4,
+        "allowedDomains": [],
+        "dataRetentionDays": 90,
+        "requirePinForExport": true,
+        "requirePinForDelete": true
+      },
+      "botName": "Support Agent",
+      "position": "right",
+      "logo": "",
+      "chatBackground": "",
+      "timezone": "Asia/Bangkok",
+      "currency": "THB",
+      "soundEnabled": true,
+      "inactivityTimeout": 5,
+      "offlineMessage": "We are currently offline. We will get back to you during business hours!",
+      "aiProvider": "groq",
+      "aiModel": "llama-3.3-70b-versatile",
+      "systemPrompt": "You are a helpful AI assistant.",
+      "widgetColor": "#667eea",
+      "welcomeMessage": "Hi there! How can I help you today?"
+    },
+    "_id": "697037de63f3fa5b58aede4a",
+    "name": "CardeadKar Gim's Workspace",
+    "owner": "697037de63f3fa5b58aede48",
+    "plan": "free",
+    "apiKey": "mc_b9ecca67d1c74678e21916c56b8aa262",
+    "createdAt": "2026-01-21T02:20:14.276Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "messagesThisMonth": 1,
+      "messagesLimit": 250,
+      "resetDate": "2026-02-24T03:04:22.855Z"
+    },
+    "settings": {
+      "businessHours": {
+        "enabled": false,
+        "start": "09:00",
+        "end": "17:00",
+        "days": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "emailAlerts": {
+        "newLead": true,
+        "dailySummary": false
+      },
+      "security": {
+        "pin": null,
+        "pinLength": 4,
+        "allowedDomains": [],
+        "dataRetentionDays": 90,
+        "requirePinForExport": true,
+        "requirePinForDelete": true
+      },
+      "botName": "Support Agent",
+      "position": "right",
+      "logo": "",
+      "chatBackground": "",
+      "timezone": "Asia/Bangkok",
+      "currency": "THB",
+      "soundEnabled": true,
+      "inactivityTimeout": 5,
+      "offlineMessage": "We are currently offline. We will get back to you during business hours!",
+      "aiProvider": "groq",
+      "aiModel": "llama-3.3-70b-versatile",
+      "systemPrompt": "You are a helpful AI assistant.",
+      "widgetColor": "#FF5733",
+      "welcomeMessage": "Hello! Updated welcome message!"
+    },
+    "_id": "697436b6e154885f5458f5bb",
+    "name": "Updated Test Workspace",
+    "owner": "697436b6e154885f5458f5b9",
+    "plan": "free",
+    "apiKey": "mc_cac7f301da4a511deac730ec123d7866",
+    "createdAt": "2026-01-24T03:04:22.855Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "messagesThisMonth": 0,
+      "messagesLimit": 250,
+      "resetDate": "2026-02-24T17:04:00.304Z"
+    },
+    "settings": {
+      "businessHours": {
+        "enabled": false,
+        "start": "09:00",
+        "end": "17:00",
+        "days": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "emailAlerts": {
+        "newLead": true,
+        "dailySummary": false
+      },
+      "security": {
+        "pin": null,
+        "pinLength": 4,
+        "allowedDomains": [],
+        "dataRetentionDays": 90,
+        "requirePinForExport": true,
+        "requirePinForDelete": true
+      },
+      "timezone": "Asia/Bangkok",
+      "currency": "THB",
+      "soundEnabled": true,
+      "inactivityTimeout": 5,
+      "offlineMessage": "We are currently offline. We will get back to you during business hours!",
+      "aiProvider": "groq",
+      "aiModel": "llama-3.3-70b-versatile",
+      "systemPrompt": "You are a helpful AI assistant.",
+      "widgetColor": "#667eea",
+      "welcomeMessage": "Hi there! How can I help you today?",
+      "botName": "Support Agent",
+      "position": "right",
+      "logo": "",
+      "chatBackground": ""
+    },
+    "_id": "6974fb805beba8a103a31b0e",
+    "name": "Bowling230's Workspace",
+    "owner": "6974fb805beba8a103a31b0c",
+    "plan": "free",
+    "apiKey": "mc_c37f469a4220501a43256e4013014750",
+    "createdAt": "2026-01-24T17:04:00.304Z",
+    "__v": 0
+  }
+]

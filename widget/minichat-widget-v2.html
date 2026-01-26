@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -114,6 +115,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -186,9 +188,13 @@
         }
 
         @keyframes typingDot {
-            0%, 60%, 100% {
+
+            0%,
+            60%,
+            100% {
                 transform: translateY(0);
             }
+
             30% {
                 transform: translateY(-10px);
             }
@@ -262,13 +268,14 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Widget Container -->
-    <div class="minichat-widget" id="minichatWidget" data-api-key="YOUR_API_KEY_HERE">
+    <div class="minichat-widget" id="minichatWidget" data-api-key="mc_addf0245a319ee0d0380cecb5d08087a">
         <!-- Chat Button -->
         <button class="minichat-button" id="minichatButton">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
             </svg>
         </button>
 
@@ -284,16 +291,11 @@
             </div>
 
             <div class="minichat-input-area">
-                <input
-                    type="text"
-                    class="minichat-input"
-                    id="minichatInput"
-                    placeholder="Type your message..."
-                    disabled
-                >
+                <input type="text" class="minichat-input" id="minichatInput" placeholder="Type your message..."
+                    disabled>
                 <button class="minichat-send" id="minichatSend" disabled>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                     </svg>
                 </button>
             </div>
@@ -301,7 +303,7 @@
     </div>
 
     <script>
-        (function() {
+        (function () {
             // Get API key from data attribute
             const widgetElement = document.getElementById('minichatWidget');
             const API_KEY = widgetElement.getAttribute('data-api-key');
@@ -313,7 +315,7 @@
 
             // Configuration (will be loaded from API)
             let CONFIG = {
-                apiUrl: 'https://api.clubfivem.com/api', // Production API URL
+                apiUrl: 'https://chat.clubfivem.com/api', // Production API URL
                 apiKey: API_KEY,
                 workspaceName: 'MiniChat',
                 welcomeMessage: 'Hi there! How can I help you today?',
@@ -522,4 +524,5 @@
         })();
     </script>
 </body>
+
 </html>

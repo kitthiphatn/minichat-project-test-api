@@ -1,18 +1,45 @@
 require('dotenv').config();
+const validateEnv = require('./config/validateEnv');
+validateEnv(); // Validate Env immediately
+
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const helmet = require('helmet'); // Security Headers
 const { connectDB } = require('./config/database');
+const { generalLimiter } = require('./middleware/rateLimiter'); // Rate Limiting
 const chatRoutes = require('./routes/chat');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 /**
  * Middleware
  */
+// Security Headers
+app.use(helmet({
+    contentSecurityPolicy: false, // Disable CSP for now to avoid breaking existing frontend/images
+    crossOriginResourcePolicy: { policy: "cross-origin" } // Allow resources to be loaded
+}));
+
+// Rate Limiting (Global)
+app.use('/api/', generalLimiter);
+
+// Strict CORS
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : ['http://localhost:3000'];
+
 app.use(cors({
-    origin: true, // Allow all origins on local network
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
     credentials: true,
 }));
 
@@ -44,6 +71,13 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/workspaces', require('./routes/workspaces'));
 app.use('/api/widget', require('./routes/widget'));
+app.use('/api/upload', require('./routes/upload'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/payment', require('./routes/payment'));
+
+// Serve uploaded files statically
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 /**
  * Root Endpoint

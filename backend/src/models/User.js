@@ -35,10 +35,17 @@ const userSchema = new mongoose.Schema({
     avatar: {
         type: String
     },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    },
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date
 });
 
 // Encrypt password using bcrypt
@@ -58,5 +65,7 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
     if (!this.password) return false;
     return await bcrypt.compare(enteredPassword, this.password);
 };
+
+userSchema.index({ role: 1 });
 
 module.exports = mongoose.model('User', userSchema);

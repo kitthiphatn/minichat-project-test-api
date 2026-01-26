@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniChat Widget Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .feature {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .feature h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .feature ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature li {
+            padding: 8px 0;
+            color: #666;
+        }
+
+        .feature li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 5px;
+        }
+
+        .instructions h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            color: #856404;
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        code {
+            background: #f1f3f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎉 MiniChat Widget Test Page</h1>
+        <p>This is a test page to verify that your MiniChat widget is working correctly.</p>
+
+        <div class="feature">
+            <h3>What to expect:</h3>
+            <ul>
+                <li>A floating chat button in the bottom-right (or left) corner</li>
+                <li>Click it to open the chat window</li>
+                <li>Type a message and get AI responses</li>
+                <li>Smooth animations and responsive design</li>
+                <li>Your custom colors, logo, and branding</li>
+            </ul>
+        </div>
+
+        <div class="feature">
+            <h3>Widget Features:</h3>
+            <ul>
+                <li>Real-time AI chat responses</li>
+                <li>Typing indicator while AI is thinking</li>
+                <li>Message history (session-based)</li>
+                <li>Mobile-responsive design</li>
+                <li>No external dependencies</li>
+                <li>Lightweight (~45KB)</li>
+            </ul>
+        </div>
+
+        <div class="instructions">
+            <h4>📝 How to use this test page:</h4>
+            <ol>
+                <li>Download your widget from the MiniChat dashboard</li>
+                <li>Save it as <code>minichat-widget.js</code> in the same folder as this HTML file</li>
+                <li>Open this HTML file in your browser</li>
+                <li>Look for the chat button in the corner</li>
+                <li>Click and start chatting!</li>
+            </ol>
+        </div>
+
+        <p style="margin-top: 30px; text-align: center; color: #999; font-size: 14px;">
+            If you see the chat button below, your widget is working! 🎊
+        </p>
+    </div>
+
+    <!-- 
+        IMPORTANT: Replace this with your actual widget file
+        Make sure the path is correct!
+    -->
+    <script src="minichat-widget.js"></script>
+</body>
+
+</html>

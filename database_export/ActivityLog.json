@@ -1,0 +1,10 @@
+[
+  {
+    "_id": "697588e416fb3b27762fb3d2",
+    "user": "696ee8047bee120f7af72e41",
+    "action": "INITIATE_CHECKOUT",
+    "details": "Started checkout for premium (monthly)",
+    "createdAt": "2026-01-25T03:07:16.956Z",
+    "__v": 0
+  }
+]
