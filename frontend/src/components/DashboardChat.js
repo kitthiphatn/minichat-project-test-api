@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Loader2, Send, Trash2, Bot, User } from 'lucide-react';
+import { Loader2, Send, Trash2, Bot, Sparkles } from 'lucide-react';
 import { getProviders, sendMessage, clearChat } from '../lib/api';
 
 export default function DashboardChat({ user }) {
@@ -10,12 +10,11 @@ export default function DashboardChat({ user }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [providers, setProviders] = useState({});
-    const [selectedProvider, setSelectedProvider] = useState('ollama');
-    const [selectedModel, setSelectedModel] = useState('llama3');
+    const [selectedProvider, setSelectedProvider] = useState('groq');
+    const [selectedModel, setSelectedModel] = useState('llama-3.1-8b-instant');
     const messagesEndRef = useRef(null);
     const [isProviderLoaded, setIsProviderLoaded] = useState(false);
 
-    // Initial Welcome Message
     useEffect(() => {
         setMessages([{
             role: 'ai',
@@ -25,7 +24,6 @@ export default function DashboardChat({ user }) {
         loadProviders();
     }, [user]);
 
-    // Auto-scroll
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
@@ -59,7 +57,6 @@ export default function DashboardChat({ user }) {
         setError('');
         setLoading(true);
 
-        // Add user message immediately
         const tempUserMsg = { role: 'user', content: userMsg };
         setMessages(prev => [...prev, tempUserMsg]);
 
@@ -69,7 +66,7 @@ export default function DashboardChat({ user }) {
         } catch (err) {
             console.error('Failed:', err);
             setError('Failed to get response.');
-            setMessages(prev => [...prev, { role: 'system', content: '❌ Failed to send message. Please check your backend connections.' }]);
+            setMessages(prev => [...prev, { role: 'system', content: 'Failed to send message. Please check your backend connections.' }]);
         } finally {
             setLoading(false);
         }
@@ -84,23 +81,23 @@ export default function DashboardChat({ user }) {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col h-[600px] transition-all duration-300">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800/50 overflow-hidden flex flex-col h-[500px] md:h-[600px] transition-all duration-300">
             {/* Header */}
-            <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+            <div className="px-4 md:px-5 py-3.5 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800/50 flex-shrink-0">
                 <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
-                            <Bot className="w-6 h-6 text-white" />
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md shadow-purple-500/20">
+                            <Sparkles className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-gray-900 dark:text-white">Test Your Bot</h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Live preview of your chat settings</p>
+                            <h3 className="font-semibold text-sm text-gray-900 dark:text-white">Test Your Bot</h3>
+                            <p className="text-[11px] text-gray-400 dark:text-gray-500">Live preview of your chat settings</p>
                         </div>
                     </div>
 
                     <button
                         onClick={handleClear}
-                        className="p-2 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                        className="p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
                         title="Clear Chat"
                     >
                         <Trash2 className="w-4 h-4" />
@@ -108,7 +105,6 @@ export default function DashboardChat({ user }) {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    {/* Provider Selector with Status */}
                     <div className="relative">
                         <select
                             value={selectedProvider}
@@ -119,23 +115,21 @@ export default function DashboardChat({ user }) {
                                     setSelectedModel(providers[provider].models[0]);
                                 }
                             }}
-                            className="text-sm border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-1.5 pl-8 pr-3 transition-colors cursor-pointer font-semibold appearance-none"
+                            className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500/30 focus:border-purple-300 dark:focus:border-purple-500/50 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-1.5 pl-7 pr-3 transition-all cursor-pointer font-medium appearance-none"
                             disabled={!isProviderLoaded}
                         >
-                            <option value="ollama">OLLAMA (LOCAL)</option>
                             <option value="groq">GROQ</option>
                         </select>
-                        {/* Status Indicator */}
-                        <span className={`absolute left-2.5 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full ${providers[selectedProvider]?.available
-                                ? 'bg-green-500 animate-pulse'
-                                : 'bg-red-500'
+                        <span className={`absolute left-2.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full ${providers[selectedProvider]?.available
+                            ? 'bg-green-500 animate-pulse'
+                            : 'bg-red-500'
                             }`}></span>
                     </div>
 
                     <select
                         value={selectedModel}
                         onChange={(e) => setSelectedModel(e.target.value)}
-                        className="text-sm border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-1.5 px-3 transition-colors cursor-pointer"
+                        className="text-xs border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500/30 focus:border-purple-300 dark:focus:border-purple-500/50 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-1.5 px-3 transition-all cursor-pointer"
                         disabled={!isProviderLoaded}
                     >
                         {isProviderLoaded ? (
@@ -150,22 +144,22 @@ export default function DashboardChat({ user }) {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900/50 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50 dark:bg-gray-950/50">
                 {messages.map((msg, idx) => (
-                    <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-                        <div className={`max-w-[85%] rounded-2xl px-5 py-3.5 text-sm leading-relaxed shadow-sm ${msg.role === 'user'
-                            ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-br-none shadow-purple-500/20'
+                    <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} fade-in`}>
+                        <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${msg.role === 'user'
+                            ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-br-sm shadow-md shadow-purple-500/10'
                             : msg.model === 'System'
-                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs py-2 px-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-700'
-                                : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-100 dark:border-gray-700 rounded-bl-none'
+                                ? 'bg-gray-100 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 text-xs py-2 px-3.5 rounded-xl border border-dashed border-gray-200 dark:border-gray-700/50'
+                                : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-100 dark:border-gray-700/50 rounded-bl-sm shadow-sm'
                             }`}>
                             {msg.content}
                         </div>
                     </div>
                 ))}
                 {loading && (
-                    <div className="flex justify-start animate-fade-in">
-                        <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 px-4 py-3 rounded-2xl rounded-bl-none shadow-sm flex items-center gap-2">
+                    <div className="flex justify-start fade-in">
+                        <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 px-4 py-3 rounded-2xl rounded-bl-sm shadow-sm flex items-center gap-1.5">
                             <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '0ms' }} />
                             <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '150ms' }} />
                             <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '300ms' }} />
@@ -176,25 +170,25 @@ export default function DashboardChat({ user }) {
             </div>
 
             {/* Input */}
-            <div className="p-3 md:p-4 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
-                <form onSubmit={handleSubmit} className="flex gap-2 md:gap-3">
+            <div className="p-3 md:p-4 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800/50 flex-shrink-0">
+                <form onSubmit={handleSubmit} className="flex gap-2">
                     <input
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder="Type a message to test..."
-                        className="flex-1 min-w-0 px-3 md:px-4 py-2 md:py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all shadow-inner text-sm md:text-base"
+                        className="flex-1 min-w-0 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-300 dark:focus:border-purple-500/50 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all text-sm"
                         disabled={loading}
                     />
                     <button
                         type="submit"
                         disabled={loading || !input.trim()}
-                        className="flex-shrink-0 px-4 md:px-5 py-2 md:py-3 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center justify-center"
+                        className="flex-shrink-0 w-10 h-10 md:w-auto md:px-4 md:py-2.5 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center justify-center"
                     >
-                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                     </button>
                 </form>
             </div>
-        </div >
+        </div>
     );
 }

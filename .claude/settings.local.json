@@ -1,12 +1,4 @@
 {
-  "hooks": {
-    "stop": ".claude/hooks/ralph-stop.sh"
-  },
-  "ralphLoop": {
-    "enabled": true,
-    "maxIterations": 50,
-    "defaultCompletionPromise": "COMPLETE"
-  },
   "permissions": {
     "allow": [
       "Bash(test:*)",
@@ -19,7 +11,39 @@
       "Bash(npm install:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nPhase 4 Complete: Widget Dynamic Configuration\n\nFrontend:\n- ✅ Widget V2 with dynamic config loading\n- ✅ Fetches configuration from /api/widget/config\n- ✅ API key authentication\n- ✅ Dynamic styling \\(custom colors\\)\n- ✅ Custom welcome message\n- ✅ Workspace-specific AI settings\n- ✅ Error handling and loading states\n- ✅ Session management\n\nFeatures:\n- Loads config on widget initialization  \n- Applies custom brand colors dynamically\n- Shows workspace name in header\n- Uses workspace AI provider/model settings\n- Automatic message counting via API\n- Beautiful typing indicators\n- Responsive design\n\nRalph Loop Progress: 10/13 phases complete\nCore MVP features: COMPLETE ✅\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(claude:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(xargs:*)",
+      "Bash(npx next lint:*)",
+      "Bash(npx next build:*)",
+      "WebFetch(domain:www.chatbot.com)",
+      "WebFetch(domain:www.zwiz.ai)",
+      "Bash(python3:*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NzZlYzExZTA1MWNmMTcwNWVmYWFlZiIsImlhdCI6MTc2OTU3NjEwNywiZXhwIjoxNzY5NTc5NzA3fQ.4v1ubUTp-1fXbi5Cv2TSozOsuZMEckrFRBZd82-bPSI\" __NEW_LINE_8206389180d4bc65__ echo \"=== TEST 1: GET /api/conversations \\(List conversations\\) ===\" curl -s -H \"Authorization: Bearer $TOKEN\" http://localhost:5000/api/conversations)",
+      "Bash(export TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NzZlYzExZTA1MWNmMTcwNWVmYWFlZiIsImlhdCI6MTc2OTU3NjEwNywiZXhwIjoxNzY5NTc5NzA3fQ.4v1ubUTp-1fXbi5Cv2TSozOsuZMEckrFRBZd82-bPSI\":*)",
+      "Bash(export TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NzZlYzExZTA1MWNmMTcwNWVmYWFlZiIsImlhdCI6MTc2OTU3NjE0MiwiZXhwIjoxNzY5NTc5NzQyfQ.rO4RkgqZSlOpr49U6A1D3fXG9gA6nORoXXBgpZ1pvfk\":*)"
     ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/ralph-stop.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "ralphLoop": {
+    "enabled": true,
+    "maxIterations": 50,
+    "defaultCompletionPromise": "COMPLETE"
   }
 }

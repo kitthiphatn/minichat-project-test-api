@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>External Site Simulation</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>External Customer Website</h1>
+        <p>This page simulates a client site embedding the MiniChat widget.</p>
+    </div>
+
+    <!-- MiniChat Widget Production Code -->
+    <script>
+        window.miniChatConfig = {
+            apiKey: 'mc_6671e82d8201511a7e1d7206d51ac795',
+            position: 'right'
+        };
+    </script>
+    <!-- Using confirmed working domain instead of cdn.minichat.app -->
+    <script src="https://chat.clubfivem.com/widget.js" defer></script>
+</body>
+
+</html>

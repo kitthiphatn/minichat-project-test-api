@@ -1,7 +1,7 @@
 /**
  * MiniChat Widget - Standalone Version
  * Auto-generated from Widget Configuration
- * 
+ *
  * This file is self-contained and requires no external dependencies.
  * Simply include it in your HTML: <script src="minichat-widget.js"></script>
  */
@@ -20,365 +20,473 @@
         position: '__POSITION__',
         logo: '__LOGO_URL__',
         workspaceId: '__WORKSPACE_ID__'
+        // System prompt is now handled securely by the backend
     };
 
+    // Helper to darken/lighten color for gradient
+    function adjustColorBrightness(hex, percent) {
+        let num = parseInt(hex.replace("#", ""), 16),
+            amt = Math.round(2.55 * percent),
+            R = (num >> 16) + amt,
+            G = (num >> 8 & 0x00FF) + amt,
+            B = (num & 0x0000FF) + amt;
+        return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 + (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+    }
+
+    // Embedded Icons (Feather Icons)
+    const DEFAULT_CHAT_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>`;
+    const SEND_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`;
+    const CLOSE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+
     // ==================== STYLES ====================
+    const colorPrimary = CONFIG.widgetColor || '#6366f1';
+    const colorDark = adjustColorBrightness(colorPrimary, -20);
+    const gradient = `linear-gradient(135deg, ${colorPrimary} 0%, ${colorDark} 100%)`;
+
     const STYLES = `
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :host {
+            --mc-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --mc-spacing-sm: 8px;
+            --mc-spacing-md: 16px;
+            --mc-spacing-lg: 20px;
+            --mc-button-size: 60px;
+            --mc-window-width: 380px;
+            --mc-window-height: 600px;
+            --mc-primary: ${colorPrimary};
+            --mc-gradient: ${gradient};
+            
+            /* Light Mode Defaults (Premium) */
+            --mc-bg-chat: #ffffff;
+            --mc-bg-message-bot: #ffffff;
+            --mc-text-bot: #1f2937;
+            --mc-border-bot: #f3f4f6;
+            --mc-bg-input: #f9fafb;
+            --mc-border-input: #e5e7eb;
+            --mc-text-main: #111827;
+            --mc-text-sub: #6b7280;
+            --mc-shadow-window: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --mc-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        /* Dark Mode Support */
+        @media (prefers-color-scheme: dark) {
+            :host {
+                --mc-bg-chat: #1f2937; /* gray-800 */
+                --mc-bg-message-bot: #374151; /* gray-700 */
+                --mc-text-bot: #f9fafb; /* gray-50 */
+                --mc-border-bot: #4b5563; /* gray-600 */
+                --mc-bg-input: #111827; /* gray-900 */
+                --mc-border-input: #374151;
+                --mc-text-main: #f9fafb;
+                --mc-text-sub: #9ca3af;
+                --mc-shadow-window: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            }
+        }
+
         #minichat-widget-container * {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
             margin: 0;
             padding: 0;
+            font-family: var(--mc-font-family);
         }
 
         #minichat-widget-container {
-            position: fixed;
-            bottom: 20px;
-            ${CONFIG.position === 'left' ? 'left: 20px;' : 'right: 20px;'}
-            z-index: 999999;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            /* Hosted inside a fixed-position Shadow Host */
+            position: relative; 
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
         }
 
+        #minichat-button, #minichat-window {
+            pointer-events: auto;
+        }
+
+        /* Floating Button */
         #minichat-button {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: ${CONFIG.widgetColor};
+            width: var(--mc-button-size);
+            height: var(--mc-button-size);
+            border-radius: 24px;
+            background: var(--mc-gradient);
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            position: relative;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: absolute;
+            bottom: 0;
+            ${CONFIG.position === 'left' ? 'left: 0;' : 'right: 0;'}
         }
 
         #minichat-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        #minichat-button:active {
+            transform: scale(0.95);
         }
 
         #minichat-button svg {
             width: 28px;
             height: 28px;
-            fill: white;
+            color: white;
+            transition: transform 0.3s ease;
         }
 
+        /* Chat Window */
         #minichat-window {
             position: absolute;
-            bottom: 80px;
+            bottom: calc(var(--mc-button-size) + 20px);
             ${CONFIG.position === 'left' ? 'left: 0;' : 'right: 0;'}
-            width: 380px;
-            height: 600px;
+            width: var(--mc-window-width);
+            height: var(--mc-window-height);
             max-height: calc(100vh - 120px);
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-            display: none;
+            background: var(--mc-bg-chat);
+            border-radius: 20px;
+            box-shadow: var(--mc-shadow-window);
+            display: flex;
             flex-direction: column;
             overflow: hidden;
-            transition: all 0.3s ease;
-            transform-origin: bottom ${CONFIG.position === 'left' ? 'left' : 'right'};
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            pointer-events: none;
+            visibility: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
         #minichat-window.open {
-            display: flex;
-            animation: slideUp 0.3s ease;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+            visibility: visible;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
+        /* Header */
         #minichat-header {
-            background: ${CONFIG.widgetColor};
-            color: white;
+            background: var(--mc-gradient);
             padding: 20px;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
         }
 
-        #minichat-header-content {
+        /* Header Shine Effect */
+        #minichat-header::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top right, rgba(255,255,255,0), rgba(255,255,255,0.1), rgba(255,255,255,0));
+            pointer-events: none;
+        }
+
+        .mc-header-left {
             display: flex;
             align-items: center;
             gap: 12px;
+            z-index: 10;
         }
 
-        #minichat-logo {
+        .mc-avatar {
             width: 40px;
             height: 40px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
+            border-radius: 50%; /* Rounded full like preview */
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        #minichat-logo img {
+        .mc-avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        #minichat-logo svg {
-            width: 24px;
-            height: 24px;
-            fill: white;
+        .mc-header-info {
+            z-index: 10;
         }
 
-        #minichat-header-text h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
+        .mc-header-info h3 {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 2px;
         }
 
-        #minichat-header-text p {
-            font-size: 12px;
-            opacity: 0.9;
+        .mc-status {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
+            font-size: 11px;
+            opacity: 0.9;
+            font-weight: 500;
         }
 
-        #minichat-status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
+        .mc-status-dot {
+            width: 6px;
+            height: 6px;
             background: #4ade80;
-            animation: pulse 2s infinite;
+            border-radius: 50%;
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.2);
+            animation: mc-pulse 2s infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
+        @keyframes mc-pulse {
+            0% { opacity: 1; }
             50% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
 
         #minichat-close {
-            background: none;
-            border: none;
+            background: rgba(255,255,255,0.15);
+            border: 0;
             color: white;
-            cursor: pointer;
-            padding: 8px;
+            width: 32px;
+            height: 32px;
             border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: background 0.2s;
+            z-index: 10;
         }
 
         #minichat-close:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.25);
         }
 
         #minichat-close svg {
-            width: 20px;
-            height: 20px;
-            fill: white;
+            width: 18px;
+            height: 18px;
         }
 
+        /* Messages */
         #minichat-messages {
             flex: 1;
+            padding: 24px 20px;
             overflow-y: auto;
-            padding: 20px;
-            background: #f9fafb;
             display: flex;
             flex-direction: column;
             gap: 16px;
+            background: var(--mc-bg-chat); /* Adaptive background */
+            scroll-behavior: smooth;
         }
 
+        /* Scrollbar */
         #minichat-messages::-webkit-scrollbar {
             width: 6px;
         }
-
         #minichat-messages::-webkit-scrollbar-track {
             background: transparent;
         }
-
         #minichat-messages::-webkit-scrollbar-thumb {
-            background: #d1d5db;
+            background-color: rgba(0,0,0,0.1);
             border-radius: 3px;
         }
 
-        .minichat-message {
+        .mc-message {
+            max-width: 85%;
+            animation: mc-fade-in 0.3s ease;
+            position: relative;
             display: flex;
-            gap: 12px;
-            animation: fadeIn 0.3s ease;
+            align-items: flex-end;
+            gap: 8px;
         }
 
-        @keyframes fadeIn {
+        @keyframes mc-fade-in {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .minichat-message.user {
-            flex-direction: row-reverse;
-        }
-
-        .minichat-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-            color: white;
-            overflow: hidden;
-        }
-
-        .minichat-message.bot .minichat-avatar {
-            background: ${CONFIG.widgetColor};
-        }
-
-        .minichat-message.user .minichat-avatar {
-            background: #6b7280;
-        }
-
-        .minichat-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .minichat-bubble {
-            max-width: 70%;
+        .mc-message-content {
             padding: 12px 16px;
             border-radius: 16px;
             font-size: 14px;
             line-height: 1.5;
-            word-wrap: break-word;
+            box-shadow: var(--mc-shadow-sm);
         }
 
-        .minichat-message.bot .minichat-bubble {
-            background: white;
-            color: #1f2937;
+        /* Bot Message */
+        .mc-message.bot {
+            align-self: flex-start;
+        }
+        .mc-message.bot .mc-message-content {
+            background: var(--mc-bg-message-bot);
+            color: var(--mc-text-bot);
+            border: 1px solid var(--mc-border-bot);
             border-bottom-left-radius: 4px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
-        .minichat-message.user .minichat-bubble {
-            background: #1f2937;
+        /* User Message */
+        .mc-message.user {
+            align-self: flex-end;
+        }
+        .mc-message.user .mc-message-content {
+            background: var(--mc-gradient);
             color: white;
             border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .minichat-typing {
-            display: flex;
-            gap: 4px;
+        /* Typing Indicator */
+        .mc-typing {
+            display: none;
+            align-self: flex-start;
+            background: var(--mc-bg-message-bot);
+            border: 1px solid var(--mc-border-bot);
             padding: 12px 16px;
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+            gap: 4px;
+            width: fit-content;
+            margin-left: 0; /* Align with bot messages */
         }
-
-        .minichat-typing-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #9ca3af;
-            animation: typing 1.4s infinite;
-        }
-
-        .minichat-typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .minichat-typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-10px); }
-        }
-
-        #minichat-input-container {
-            padding: 16px;
-            background: white;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        #minichat-input-wrapper {
+        .mc-typing.active {
             display: flex;
-            gap: 8px;
+        }
+        .mc-dot {
+            width: 6px;
+            height: 6px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: mc-bounce 1.4s infinite ease-in-out both;
+        }
+        .mc-dot:nth-child(1) { animation-delay: -0.32s; }
+        .mc-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes mc-bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Input Area */
+        #minichat-footer {
+            padding: 16px 20px;
+            background: var(--mc-bg-chat);
+            border-top: 1px solid var(--mc-border-bot);
+        }
+
+        .mc-input-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .mc-input-wrapper {
+            flex: 1;
+            display: flex;
             align-items: center;
+            background: var(--mc-bg-input);
+            border-radius: 24px;
+            padding: 8px 16px;
+            transition: all 0.2s;
+            border: 1px solid var(--mc-border-input);
+            min-height: 44px;
+        }
+
+        .mc-input-wrapper:focus-within {
+            background: var(--mc-bg-chat);
+            border-color: var(--mc-primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
         }
 
         #minichat-input {
             flex: 1;
-            padding: 12px 16px;
-            border: 1px solid #e5e7eb;
-            border-radius: 24px;
-            font-size: 14px;
+            border: none;
+            background: transparent;
+            font-size: 15px;
             outline: none;
-            transition: border-color 0.2s;
+            color: var(--mc-text-main);
+            padding: 4px 0;
             font-family: inherit;
+            line-height: 1.5;
         }
-
-        #minichat-input:focus {
-            border-color: ${CONFIG.widgetColor};
+        
+        #minichat-input::placeholder {
+            color: var(--mc-text-sub);
+            opacity: 0.8;
         }
 
         #minichat-send {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: ${CONFIG.widgetColor};
             border: none;
-            cursor: pointer;
+            background: var(--mc-primary);
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
             transition: all 0.2s;
             flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
         #minichat-send:hover:not(:disabled) {
             transform: scale(1.05);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
         }
 
         #minichat-send:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+            background: var(--mc-border-input);
+            color: var(--mc-text-sub);
+            cursor: default;
+            box-shadow: none;
         }
 
         #minichat-send svg {
-            width: 18px;
-            height: 18px;
-            fill: white;
+            width: 20px;
+            height: 20px;
+            margin-left: 2px; /* Visual balance */
         }
 
-        #minichat-powered {
+        .mc-branding {
             text-align: center;
-            padding: 8px;
             font-size: 11px;
-            color: #9ca3af;
+            color: var(--mc-text-sub);
+            margin-top: 8px;
+            opacity: 0.8;
         }
-
-        #minichat-powered a {
-            color: ${CONFIG.widgetColor};
+        .mc-branding a {
+            color: var(--mc-text-sub);
             text-decoration: none;
             font-weight: 600;
         }
 
-        /* Mobile Responsive */
+        /* Mobile */
         @media (max-width: 480px) {
             #minichat-window {
-                width: calc(100vw - 40px);
-                height: calc(100vh - 100px);
-                max-height: calc(100vh - 100px);
+                position: fixed; /* Fix: Break out of container constraints */
+                width: 100%;
+                height: 100dvh; /* Use dynamic viewport height for mobile browsers */
+                max-height: 100dvh;
+                border-radius: 0;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                top: 0; /* Ensure it hits top */
+                z-index: 9999999; /* Ensure on top of everything */
             }
-
             #minichat-widget-container {
-                bottom: 16px;
-                ${CONFIG.position === 'left' ? 'left: 16px;' : 'right: 16px;'}
+                right: 20px;
+                bottom: 20px;
             }
         }
     `;
@@ -388,163 +496,157 @@
         constructor(config) {
             this.config = config;
             this.isOpen = false;
-            this.messages = [];
-            this.sessionId = this.generateSessionId();
-        }
-
-        generateSessionId() {
-            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            this.sessionId = 'sess_' + Math.random().toString(36).substr(2, 9);
+            this.shadowRoot = null; // Store shadow root reference
         }
 
         init() {
-            this.injectStyles();
             this.createWidget();
             this.attachEventListeners();
-            this.addWelcomeMessage();
-        }
-
-        injectStyles() {
-            const styleEl = document.createElement('style');
-            styleEl.textContent = STYLES;
-            document.head.appendChild(styleEl);
+            this.addMessage('bot', this.config.welcomeMessage || 'Hello! How can I help you?');
         }
 
         createWidget() {
-            const container = document.createElement('div');
-            container.id = 'minichat-widget-container';
+            // Create Host Element
+            const host = document.createElement('div');
+            host.id = 'minichat-host';
+            // Ensure host acts as a stable anchor, but doesn't block clicks itself unless hit
+            host.style.position = 'fixed';
+            host.style.bottom = '0';
+            host.style.right = '0'; // Default, will be overridden by internal logic if needed
+            host.style.zIndex = '2147483647'; // Max z-index
+            host.style.width = '0';
+            host.style.height = '0';
+            host.style.overflow = 'visible';
 
-            const logoHTML = this.config.logo && this.config.logo !== '__LOGO_URL__'
-                ? `<img src="${this.config.logo}" alt="Logo" />`
-                : `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>`;
+            document.body.appendChild(host);
 
-            container.innerHTML = `
-                <div id="minichat-window">
-                    <div id="minichat-header">
-                        <div id="minichat-header-content">
-                            <div id="minichat-logo">${logoHTML}</div>
-                            <div id="minichat-header-text">
-                                <h3>${this.config.botName}</h3>
-                                <p><span id="minichat-status-dot"></span>Online</p>
+            // Attach Shadow DOM
+            this.shadowRoot = host.attachShadow({ mode: 'open' });
+
+            // Prepare Content
+            const logoHtml = this.config.logo && this.config.logo.length > 0 && this.config.logo !== '__LOGO_URL__'
+                ? `<img src="${this.config.logo}" alt="" />`
+                : `<span style="color:white; font-weight:bold; font-size:14px;">AI</span>`;
+
+            // Inject Styles & HTML into Shadow DOM
+            this.shadowRoot.innerHTML = `
+                <style>
+                    ${STYLES}
+                </style>
+                <div id="minichat-widget-container">
+                    <button id="minichat-button" aria-label="Toggle chat">
+                        ${DEFAULT_CHAT_ICON}
+                    </button>
+
+                    <div id="minichat-window">
+                        <div id="minichat-header">
+                            <div class="mc-header-left">
+                                <div class="mc-avatar">
+                                    ${logoHtml}
+                                </div>
+                                <div class="mc-header-info">
+                                    <h3>${this.config.botName}</h3>
+                                    <div class="mc-status">
+                                        <span class="mc-status-dot"></span> Online
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <button id="minichat-close">
-                            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-                        </button>
-                    </div>
-                    <div id="minichat-messages"></div>
-                    <div id="minichat-input-container">
-                        <div id="minichat-input-wrapper">
-                            <input type="text" id="minichat-input" placeholder="Type a message..." />
-                            <button id="minichat-send">
-                                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                            <button id="minichat-close" aria-label="Close">
+                                ${CLOSE_ICON}
                             </button>
                         </div>
-                        <div id="minichat-powered">
-                            Powered by <a href="https://minichat.ai" target="_blank">MiniChat</a>
+
+                        <div id="minichat-messages"></div>
+
+                        <div class="mc-typing" id="mc-typing">
+                            <div class="mc-dot"></div><div class="mc-dot"></div><div class="mc-dot"></div>
+                        </div>
+
+                        <div id="minichat-footer">
+                            <div class="mc-input-container">
+                                <div class="mc-input-wrapper">
+                                    <input type="text" id="minichat-input" placeholder="Type a message..." autocomplete="off">
+                                </div>
+                                <button id="minichat-send" aria-label="Send">
+                                    ${SEND_ICON}
+                                </button>
+                            </div>
+                            <div class="mc-branding">
+                                Powered by <a href="#" target="_blank">MiniChat AI</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <button id="minichat-button">
-                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-                </button>
             `;
 
-            document.body.appendChild(container);
+            // Cache Elements from Shadow Root
+            this.elements = {
+                container: this.shadowRoot.getElementById('minichat-widget-container'),
+                button: this.shadowRoot.getElementById('minichat-button'),
+                window: this.shadowRoot.getElementById('minichat-window'),
+                messages: this.shadowRoot.getElementById('minichat-messages'),
+                input: this.shadowRoot.getElementById('minichat-input'),
+                sendBtn: this.shadowRoot.getElementById('minichat-send'),
+                closeBtn: this.shadowRoot.getElementById('minichat-close'),
+                typing: this.shadowRoot.getElementById('mc-typing')
+            };
         }
 
         attachEventListeners() {
-            document.getElementById('minichat-button').addEventListener('click', () => this.toggleChat());
-            document.getElementById('minichat-close').addEventListener('click', () => this.toggleChat());
-            document.getElementById('minichat-send').addEventListener('click', () => this.sendMessage());
-            document.getElementById('minichat-input').addEventListener('keypress', (e) => {
+            this.elements.button.addEventListener('click', () => this.toggleChat());
+            this.elements.closeBtn.addEventListener('click', () => this.toggleChat());
+            this.elements.sendBtn.addEventListener('click', () => this.sendMessage());
+            this.elements.input.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') this.sendMessage();
             });
         }
 
         toggleChat() {
             this.isOpen = !this.isOpen;
-            const window = document.getElementById('minichat-window');
-
             if (this.isOpen) {
-                window.classList.add('open');
-                document.getElementById('minichat-input').focus();
+                this.elements.window.classList.add('open');
+                this.elements.button.style.transform = 'scale(0.8) rotate(90deg)';
+                this.elements.button.style.opacity = '0';
+                this.elements.button.style.pointerEvents = 'none';
+                setTimeout(() => this.elements.input.focus(), 300);
             } else {
-                window.classList.remove('open');
+                this.elements.window.classList.remove('open');
+                this.elements.button.style.transform = 'scale(1) rotate(0deg)';
+                this.elements.button.style.opacity = '1';
+                this.elements.button.style.pointerEvents = 'auto';
             }
         }
 
-        addWelcomeMessage() {
-            this.addMessage('bot', this.config.welcomeMessage);
-        }
+        addMessage(role, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `mc-message ${role}`;
 
-        addMessage(type, text) {
-            const messagesContainer = document.getElementById('minichat-messages');
-            const messageEl = document.createElement('div');
-            messageEl.className = `minichat-message ${type}`;
+            // Format line breaks and sanitize basic HTML
+            // Note: In a real prod environment, use DOMPurify. Here we allow specific tags or just text.
+            // For now, mirroring previous logic but safer to create text nodes or simple replacements.
+            const formattedText = text.replace(/\\n/g, '<br>');
 
-            const avatarHTML = type === 'bot' && this.config.logo && this.config.logo !== '__LOGO_URL__'
-                ? `<img src="${this.config.logo}" alt="Bot" />`
-                : type === 'bot'
-                    ? 'AI'
-                    : 'You';
-
-            messageEl.innerHTML = `
-                <div class="minichat-avatar">${avatarHTML}</div>
-                <div class="minichat-bubble">${this.escapeHtml(text)}</div>
+            msgDiv.innerHTML = `
+                <div class="mc-message-content">${formattedText}</div>
             `;
 
-            messagesContainer.appendChild(messageEl);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-            this.messages.push({ type, text, timestamp: Date.now() });
-        }
-
-        showTypingIndicator() {
-            const messagesContainer = document.getElementById('minichat-messages');
-            const typingEl = document.createElement('div');
-            typingEl.className = 'minichat-message bot';
-            typingEl.id = 'minichat-typing-indicator';
-
-            const avatarHTML = this.config.logo && this.config.logo !== '__LOGO_URL__'
-                ? `<img src="${this.config.logo}" alt="Bot" />`
-                : 'AI';
-
-            typingEl.innerHTML = `
-                <div class="minichat-avatar">${avatarHTML}</div>
-                <div class="minichat-bubble">
-                    <div class="minichat-typing">
-                        <div class="minichat-typing-dot"></div>
-                        <div class="minichat-typing-dot"></div>
-                        <div class="minichat-typing-dot"></div>
-                    </div>
-                </div>
-            `;
-
-            messagesContainer.appendChild(typingEl);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        hideTypingIndicator() {
-            const typingEl = document.getElementById('minichat-typing-indicator');
-            if (typingEl) typingEl.remove();
+            this.elements.messages.appendChild(msgDiv);
+            this.elements.messages.scrollTop = this.elements.messages.scrollHeight;
         }
 
         async sendMessage() {
-            const input = document.getElementById('minichat-input');
-            const sendBtn = document.getElementById('minichat-send');
-            const message = input.value.trim();
+            const text = this.elements.input.value.trim();
+            if (!text) return;
 
-            if (!message) return;
-
-            // Add user message
-            this.addMessage('user', message);
-            input.value = '';
-            sendBtn.disabled = true;
-
-            // Show typing indicator
-            this.showTypingIndicator();
+            this.addMessage('user', text);
+            this.elements.input.value = '';
+            this.elements.sendBtn.disabled = true;
+            this.elements.typing.classList.add('active');
+            this.elements.messages.scrollTop = this.elements.messages.scrollHeight;
 
             try {
+                // Send Clean Message
                 const response = await fetch(`${this.config.apiUrl}/chat/message`, {
                     method: 'POST',
                     headers: {
@@ -552,55 +654,36 @@
                         'Authorization': `Bearer ${this.config.apiKey}`
                     },
                     body: JSON.stringify({
-                        message: message,
+                        message: text,
                         sessionId: this.sessionId,
-                        workspaceId: this.config.workspaceId
+                        workspaceId: this.config.workspaceId,
+                        apiKey: this.config.apiKey
                     })
                 });
 
                 const data = await response.json();
+                this.elements.typing.classList.remove('active');
+                this.elements.sendBtn.disabled = false;
 
-                this.hideTypingIndicator();
-
-                if (data.success && data.response) {
-                    this.addMessage('bot', data.response);
+                if (data.success && (data.message || data.response)) {
+                    this.addMessage('bot', data.message || data.response);
                 } else {
                     this.addMessage('bot', 'Sorry, I encountered an error. Please try again.');
                 }
-            } catch (error) {
-                console.error('MiniChat Error:', error);
-                this.hideTypingIndicator();
-                this.addMessage('bot', 'Sorry, I\'m having trouble connecting. Please try again later.');
-            } finally {
-                sendBtn.disabled = false;
-                input.focus();
+
+            } catch (err) {
+                console.error('Chat Error:', err);
+                this.elements.typing.classList.remove('active');
+                this.elements.sendBtn.disabled = false;
+                this.addMessage('bot', 'Network error. Please check your connection.');
             }
         }
-
-        escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
     }
 
-    // ==================== AUTO-INITIALIZE ====================
-    function initWidget() {
-        // Validate configuration
-        if (CONFIG.apiKey === '__API_KEY__' || !CONFIG.apiKey) {
-            console.error('MiniChat Widget: Invalid API key. Please download the widget from your dashboard.');
-            return;
-        }
-
-        // Initialize widget
+    // Initialize
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => new MiniChatWidget(CONFIG).init());
+    } else {
         new MiniChatWidget(CONFIG).init();
     }
-
-    // Wait for DOM to be ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initWidget);
-    } else {
-        initWidget();
-    }
-
 })();

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Mobile Debug</title>
+    <style>
+        body { background: #f0f0f0; height: 200vh; } /* content to scroll */
+        
+        /* Validated CSS from widget-template.js */
+        :root {
+            --mc-button-size: 60px;
+            --mc-window-width: 380px;
+            --mc-window-height: 600px;
+        }
+
+        #minichat-widget-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999999;
+            /* No width/height defined, so it shrinks to fit content (button) */
+        }
+
+        #minichat-button {
+            width: var(--mc-button-size);
+            height: var(--mc-button-size);
+            background: blue;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        #minichat-window {
+            position: absolute;
+            bottom: calc(var(--mc-button-size) + 20px);
+            right: 0;
+            width: var(--mc-window-width);
+            height: var(--mc-window-height);
+            background: white;
+            border: 1px solid black;
+            display: flex;
+            flex-direction: column;
+            /* opacity: 0; transform ... skipping animation related visibility for test */
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 480px) {
+            #minichat-window {
+                width: 100%;
+                height: 100%; /* PROBLEM: 100% of container? container is 0x0 or button size */
+                max-height: 100%;
+                border-radius: 0;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                background: red; /* distinct color for test */
+            }
+            #minichat-widget-container {
+                right: 20px;
+                bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Mobile View Debug</h1>
+    <p>Resize browser to < 480px to test.</p>
+    
+    <div id="minichat-widget-container">
+        <button id="minichat-button">BTN</button>
+        <div id="minichat-window">
+            HEADER<br>
+            MESSAGES<br>
+            FOOTER
+        </div>
+    </div>
+</body>
+</html>

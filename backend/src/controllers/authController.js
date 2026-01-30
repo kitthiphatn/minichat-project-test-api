@@ -52,7 +52,8 @@ exports.register = async (req, res) => {
             user: {
                 id: user._id,
                 username: user.username,
-                email: user.email
+                email: user.email,
+                role: user.role
             },
             workspace: {
                 id: workspace._id,
@@ -99,7 +100,8 @@ exports.login = async (req, res) => {
             user: {
                 id: user._id,
                 username: user.username,
-                email: user.email
+                email: user.email,
+                role: user.role
             },
             workspace: workspace ? {
                 id: workspace._id,

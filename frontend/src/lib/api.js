@@ -66,12 +66,13 @@ export const getChatHistory = async () => {
  * @param {String} model - AI model
  * @returns {Promise<Object>} User and AI messages
  */
-export const sendMessage = async (message, provider, model) => {
+export const sendMessage = async (message, provider, model, workspaceId) => {
     try {
         const response = await api.post('/chat/message', {
             message,
             provider,
             model,
+            workspaceId,
         });
         return response.data;
     } catch (error) {

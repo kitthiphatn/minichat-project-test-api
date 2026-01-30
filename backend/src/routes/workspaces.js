@@ -4,6 +4,12 @@ const { protect } = require('../middleware/auth');
 const Workspace = require('../models/Workspace');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const { parse } = require('csv-parse/sync');
+
+// Configure Multer for memory storage
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 // @desc    Get all workspaces for current user
 // @route   GET /api/workspaces
@@ -66,48 +72,51 @@ router.post('/', protect, async (req, res) => {
 // @desc    Update workspace
 // @route   PUT /api/workspaces/:id
 // @access  Private
+// @desc    Update workspace
+// @route   PUT /api/workspaces/:id
+// @access  Private
 router.put('/:id', protect, async (req, res) => {
     try {
-        const workspace = await Workspace.findOne({
-            _id: req.params.id,
-            owner: req.user.id
-        });
+        const { name, settings } = req.body;
+        const updates = {};
+
+        if (name) updates.name = name;
+
+        if (settings) {
+            Object.keys(settings).forEach(key => {
+                if (key === 'security' && typeof settings[key] === 'object') {
+                    // Flatten security keys manually or handle specifically
+                    // For Mongoose $set, we can use dot notation "settings.security.key"
+                    Object.keys(settings.security).forEach(secKey => {
+                        if (secKey !== 'pin') { // Protect PIN
+                            updates[`settings.security.${secKey}`] = settings.security[secKey];
+                        }
+                    });
+                } else {
+                    updates[`settings.${key}`] = settings[key];
+                }
+            });
+        }
+
+        const workspace = await Workspace.findOneAndUpdate(
+            { _id: req.params.id, owner: req.user.id },
+            { $set: updates },
+            { new: true, runValidators: true }
+        );
 
         if (!workspace) {
             return res.status(404).json({ success: false, error: 'Workspace not found' });
         }
 
-        // Update allowed fields
-        const { name, settings } = req.body;
-
-        if (name) workspace.name = name;
-
-        if (settings) {
-            // Safe merge for settings
-            Object.keys(settings).forEach(key => {
-                if (key === 'security' && typeof settings[key] === 'object') {
-                    // Deep merge for security object
-                    if (!workspace.settings.security) workspace.settings.security = {};
-
-                    Object.keys(settings.security).forEach(secKey => {
-                        // Don't authenticate/update PIN here, use dedicated endpoint
-                        if (secKey !== 'pin') {
-                            workspace.settings.security[secKey] = settings.security[secKey];
-                        }
-                    });
-                } else {
-                    workspace.settings[key] = settings[key];
-                }
-            });
-            workspace.markModified('settings');
-        }
-
-        await workspace.save();
-
         res.json({ success: true, workspace });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, error: 'Server Error' });
+        console.error('Update workspace error:', error);
+        // Return actual error message to help debugging (especially validation errors)
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Server Error',
+            details: error.errors // Mongoose validation errors
+        });
     }
 });
 
@@ -136,19 +145,25 @@ router.post('/:id/pin', protect, async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPin = await bcrypt.hash(pin, salt);
 
-        // Update PIN
+        // Ensure structure
+        if (!workspace.settings) workspace.settings = {};
         if (!workspace.settings.security) workspace.settings.security = {};
+
+        // Update PIN
         workspace.settings.security.pin = hashedPin;
-        // Default settings if missing
-        if (!workspace.settings.security.pinLength) workspace.settings.security.pinLength = pin.length;
+
+        // Auto-update length if changed
+        if ([4, 6].includes(pin.length)) {
+            workspace.settings.security.pinLength = pin.length;
+        }
 
         workspace.markModified('settings');
         await workspace.save();
 
         res.json({ success: true, message: 'Security PIN updated successfully' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Server Error' });
+        console.error('PIN Update Error:', error);
+        res.status(500).json({ error: error.message || 'Server Error' });
     }
 });
 
@@ -376,6 +391,292 @@ router.delete('/:id', protect, async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, error: 'Server Error' });
+    }
+});
+
+// @desc    Export products to CSV
+// @route   GET /api/workspaces/:id/products/export
+// @access  Private
+router.get('/:id/products/export', protect, async (req, res) => {
+    try {
+        const workspace = await Workspace.findOne({
+            _id: req.params.id,
+            owner: req.user.id
+        });
+
+        if (!workspace) {
+            return res.status(404).json({ success: false, error: 'Workspace not found' });
+        }
+
+        const products = workspace.productCatalog?.products || [];
+
+        // Definition of headers matching the Import format
+        const headers = ['Product Name', 'Description', 'Price', 'Compare At Price', 'Category', 'Product Images (URLs)'];
+
+        if (products.length === 0) {
+            // Return empty CSV with headers
+            const BOM = '\uFEFF';
+            return res.status(200).send(BOM + headers.join(',') + '\n');
+        }
+
+        const processField = (val) => {
+            if (val === undefined || val === null) return '';
+            const stringVal = String(val);
+            // Escape double quotes and wrap in double quotes
+            return `"${stringVal.replace(/"/g, '""')}"`;
+        };
+
+        const csvRows = products.map(product => {
+            return [
+                processField(product.name),
+                processField(product.description),
+                processField(product.price),
+                processField(product.compareAtPrice),
+                processField(product.category),
+                processField(product.images ? product.images.join(', ') : '')
+            ].join(',');
+        });
+
+        const csvContent = [headers.join(','), ...csvRows].join('\n');
+        const BOM = '\uFEFF'; // Add BOM for Excel compatibility
+
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="products_export_${workspace.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.csv"`);
+        res.status(200).send(BOM + csvContent);
+
+    } catch (error) {
+        console.error('Export Error:', error);
+        res.status(500).json({ success: false, error: 'Server Error' });
+    }
+});
+
+// @desc    Import products from CSV
+// @route   POST /api/workspaces/:id/products/import
+// @access  Private
+router.post('/:id/products/import', protect, upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'Please upload a CSV file' });
+        }
+
+        const workspace = await Workspace.findOne({
+            _id: req.params.id,
+            owner: req.user.id
+        });
+
+        if (!workspace) {
+            return res.status(404).json({ success: false, error: 'Workspace not found' });
+        }
+
+        const fileContent = req.file.buffer.toString('utf-8');
+
+        // Parse CSV
+        const records = parse(fileContent, {
+            columns: true,
+            skip_empty_lines: true,
+            trim: true,
+            bom: true // Handle Excel BOM
+        });
+
+        const newProducts = [];
+        let skippedIds = 0;
+
+        // Helper to find key case-insensitively
+        const findKey = (obj, targetKey) => {
+            const keys = Object.keys(obj);
+            return keys.find(k => k.trim().toLowerCase() === targetKey.trim().toLowerCase());
+        };
+
+        for (const record of records) {
+            // Helper to get value using fuzzy key matching
+            const getValue = (targetKey) => {
+                const key = findKey(record, targetKey);
+                return key ? record[key] : undefined;
+            };
+
+            // Mapping Logic (Matches Form Layout)
+            // Column Order: Product Name -> Description -> Price -> Compare At Price -> Category -> Product Images (URLs)
+
+            // 1. Basic Fields
+            const name = getValue('Product Name');
+            const description = getValue('Description');
+            const priceVal = getValue('Price');
+            const price = parseFloat(priceVal);
+            const compareVal = getValue('Compare At Price');
+            const compareAtPrice = compareVal ? parseFloat(compareVal) : undefined;
+            const category = getValue('Category');
+
+            // 2. Image Handling
+            // "Product Images (URLs)" contains all images, comma separated
+            const images = [];
+
+            const imagesVal = getValue('Product Images (URLs)') || getValue('Product Images'); // Try both names
+            if (imagesVal && imagesVal.trim()) {
+                const urlList = imagesVal.split(',').map(url => url.trim()).filter(url => url);
+                images.push(...urlList);
+            }
+
+            // Validation
+            if (!name || isNaN(price)) {
+                // Debug log for first skip
+                if (skippedIds === 0) {
+                    console.log('Skipping record (missing name or price):', record);
+                    console.log('Detected Keys:', Object.keys(record));
+                }
+                skippedIds++;
+                continue; // Skip invalid records
+            }
+
+            newProducts.push({
+                name,
+                description,
+                price,
+                compareAtPrice,
+                category,
+                images: images,
+                stock: { available: 100, trackInventory: false }, // Default
+                isActive: true, // Default to true
+                createdAt: new Date()
+            });
+        }
+
+        // Initialize productCatalog if missing
+        if (!workspace.productCatalog) {
+            workspace.productCatalog = { products: [] };
+        }
+
+        // Add new products to existing list
+        workspace.productCatalog.products.push(...newProducts);
+
+        // Limit check could be added here based on plan
+
+        await workspace.save();
+
+        res.json({
+            success: true,
+            message: `Selected ${newProducts.length} products to import. ${newProducts.length} imported successfully. ${skippedIds} skipped.`,
+            count: newProducts.length
+        });
+
+    } catch (error) {
+        console.error('Import Error:', error);
+        res.status(500).json({ success: false, error: error.message || 'Failed to process CSV' });
+    }
+});
+
+// @desc    Import FAQs from CSV
+// @route   POST /api/workspaces/:id/faqs/import
+// @access  Private
+router.post('/:id/faqs/import', protect, upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'Please upload a CSV file' });
+        }
+
+        const workspace = await Workspace.findOne({
+            _id: req.params.id,
+            owner: req.user.id
+        });
+
+        if (!workspace) {
+            return res.status(404).json({ success: false, error: 'Workspace not found' });
+        }
+
+        const fileContent = req.file.buffer.toString('utf-8');
+
+        // Parse CSV
+        const records = parse(fileContent, {
+            columns: true,
+            skip_empty_lines: true,
+            trim: true,
+            bom: true
+        });
+
+        const newFaqs = [];
+        let skippedIds = 0;
+
+        // Helper to find key case-insensitively
+        const findKey = (obj, targetKey) => {
+            const keys = Object.keys(obj);
+            return keys.find(k => k.trim().toLowerCase() === targetKey.trim().toLowerCase());
+        };
+
+        for (const record of records) {
+            const getValue = (targetKey) => {
+                const key = findKey(record, targetKey);
+                return key ? record[key] : undefined;
+            };
+
+            const question = getValue('Question');
+            const answer = getValue('Answer');
+            const category = getValue('Category');
+
+            if (!question || !answer) {
+                skippedIds++;
+                continue;
+            }
+
+            newFaqs.push({
+                question,
+                answer,
+                category,
+                isActive: true,
+                order: 0
+            });
+        }
+
+        // Initialize knowledgeBase if missing
+        if (!workspace.knowledgeBase) {
+            workspace.knowledgeBase = { faqs: [] };
+        }
+        if (!workspace.knowledgeBase.faqs) {
+            workspace.knowledgeBase.faqs = [];
+        }
+
+        // Enforce Limit for Free Plan
+        if (workspace.plan === 'free') {
+            const currentCount = workspace.knowledgeBase.faqs.length;
+            const remaining = 10 - currentCount;
+
+            if (remaining <= 0) {
+                return res.status(403).json({
+                    success: false,
+                    error: 'Free plan limit reached (Max 10 FAQs). Upgrade to add more.'
+                });
+            }
+
+            if (newFaqs.length > remaining) {
+                // Determine if we should partial import or block
+                // User requirement implies "do this for freeplan", usually means don't exceed.
+                // I will trim the newFaqs to fit the limit and warn the user.
+                const allowedFaqs = newFaqs.slice(0, remaining);
+                const deniedCount = newFaqs.length - remaining;
+
+                workspace.knowledgeBase.faqs.push(...allowedFaqs);
+                await workspace.save();
+
+                return res.json({
+                    success: true,
+                    message: `Imported ${allowedFaqs.length} FAQs. ${deniedCount} skipped due to Free plan limit (Max 10). ${skippedIds} invalid rows skipped.`,
+                    count: allowedFaqs.length,
+                    partial: true
+                });
+            }
+        }
+
+        // Add all (if not free or within limit)
+        workspace.knowledgeBase.faqs.push(...newFaqs);
+        await workspace.save();
+
+        res.json({
+            success: true,
+            message: `Imported ${newFaqs.length} FAQs successfully. ${skippedIds} skipped due to missing question or answer.`,
+            count: newFaqs.length
+        });
+
+    } catch (error) {
+        console.error('Import Error:', error);
+        res.status(500).json({ success: false, error: error.message || 'Failed to process CSV' });
     }
 });
 

@@ -8,17 +8,31 @@ const messageSchema = new mongoose.Schema(
     {
         role: {
             type: String,
-            enum: ['user', 'ai'],
+            enum: ['user', 'ai', 'human'],  // Added 'human' for agent messages
             required: [true, 'Role is required'],
+        },
+        sentBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            default: null  // Only set when role is 'human'
         },
         content: {
             type: String,
-            required: [true, 'Content is required'],
+            required: [true, 'Content is required'], // Fallback text for notifications/logs
             maxlength: [10000, 'Content cannot exceed 10000 characters'],
+        },
+        type: {
+            type: String,
+            enum: ['text', 'card', 'carousel', 'image', 'form'],
+            default: 'text',
+        },
+        structuredData: {
+            type: Object, // JSON data for UI rendering (e.g. product details)
+            default: null,
         },
         provider: {
             type: String,
-            enum: ['ollama', 'openrouter', 'groq', 'anthropic'],
+            enum: ['ollama', 'openrouter', 'groq', 'anthropic', 'human'],
             default: 'ollama',
         },
         model: {
@@ -97,7 +111,10 @@ messageSchema.methods.toResponse = function () {
     return {
         _id: this._id,
         role: this.role,
+        sentBy: this.sentBy,
         content: this.content,
+        type: this.type,
+        structuredData: this.structuredData,
         provider: this.provider,
         model: this.model,
         sessionId: this.sessionId,

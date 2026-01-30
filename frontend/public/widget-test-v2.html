@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniChat Widget Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        h1 { color: #333; }
+        p { color: #666; max-width: 600px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>MiniChat Widget Test</h1>
+    <p>The widget should appear in the bottom right corner. Click the button to open it.</p>
+
+    <!-- Simulate Backend Injection -->
+    <script>
+        // Manually loading the script and modifying it to simulate backend injection would be complex.
+        // Instead, we will fetch the text, replace placeholders, and eval it (for testing purposes only).
+        
+        fetch('/widget-template.js')
+            .then(response => response.text())
+            .then(text => {
+                const config = {
+                    apiKey: 'test-api-key', // Placeholder
+                    apiUrl: 'http://localhost:5001/api',
+                    botName: 'POS Assistant',
+                    welcomeMessage: 'สวัสดีครับ! มีอะไรให้ผมช่วยเกี่ยวกับระบบ POS ไหมครับ?',
+                    widgetColor: '#FF6B6B', // Test with a different color to verify gradient logic
+                    position: 'right',
+                    logo: '',
+                    workspaceId: '12345',
+                    systemPrompt: '' // Leave empty to test default fallback
+                };
+
+                let widgetCode = text;
+                widgetCode = widgetCode.replace(/__API_KEY__/g, config.apiKey);
+                widgetCode = widgetCode.replace(/__API_URL__/g, config.apiUrl);
+                widgetCode = widgetCode.replace(/__BOT_NAME__/g, config.botName);
+                widgetCode = widgetCode.replace(/__WELCOME_MESSAGE__/g, config.welcomeMessage);
+                widgetCode = widgetCode.replace(/__WIDGET_COLOR__/g, config.widgetColor);
+                widgetCode = widgetCode.replace(/__POSITION__/g, config.position);
+                widgetCode = widgetCode.replace(/__LOGO_URL__/g, config.logo);
+                widgetCode = widgetCode.replace(/__WORKSPACE_ID__/g, config.workspaceId);
+                widgetCode = widgetCode.replace(/__SYSTEM_PROMPT__/g, config.systemPrompt);
+
+                eval(widgetCode);
+            })
+            .catch(err => console.error('Failed to load widget:', err));
+    </script>
+</body>
+</html>

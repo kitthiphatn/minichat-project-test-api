@@ -33,6 +33,22 @@ const workspaceSchema = new mongoose.Schema({
             type: Number,
             default: 250 // Free plan limit
         },
+        productsCount: {
+            type: Number,
+            default: 0
+        },
+        productsLimit: {
+            type: Number,
+            default: 10 // Free plan limit
+        },
+        ordersThisMonth: {
+            type: Number,
+            default: 0
+        },
+        ordersLimit: {
+            type: Number,
+            default: 20 // Free plan limit
+        },
         resetDate: {
             type: Date,
             default: function () {
@@ -54,7 +70,7 @@ const workspaceSchema = new mongoose.Schema({
         systemPrompt: {
             type: String,
             default: 'You are a helpful AI assistant.',
-            maxlength: 500
+            maxlength: 2500
         },
         widgetColor: {
             type: String,
@@ -122,6 +138,85 @@ const workspaceSchema = new mongoose.Schema({
         offlineMessage: {
             type: String,
             default: 'We are currently offline. We will get back to you during business hours!'
+        }
+    },
+    // Product Catalog Configuration
+    productCatalog: {
+        source: {
+            type: String,
+            enum: ['manual', 'scrape', 'api'],
+            default: 'manual'
+        },
+        sourceUrl: String,
+        apiEndpoint: String,
+        products: [{
+            id: String,
+            name: { type: String, required: true },
+            description: String,
+            price: { type: Number, required: true },
+            compareAtPrice: Number,
+            images: [String],
+            category: String,
+            stock: {
+                available: { type: Number, default: 0 },
+                trackInventory: { type: Boolean, default: false }
+            },
+            isActive: { type: Boolean, default: true },
+            metadata: Object,
+            createdAt: { type: Date, default: Date.now }
+        }]
+    },
+    // Knowledge Base Configuration
+    knowledgeBase: {
+        faqs: [{
+            question: { type: String, required: true },
+            answer: { type: String, required: true },
+            category: String,
+            order: { type: Number, default: 0 },
+            isActive: { type: Boolean, default: true }
+        }],
+        documents: [{
+            name: String,
+            url: String,
+            uploadedAt: { type: Date, default: Date.now },
+            fileType: String
+        }],
+        customInstructions: {
+            type: String,
+            maxlength: 5000
+        }
+    },
+    // Payment Configuration
+    paymentSettings: {
+        enabled: { type: Boolean, default: false },
+        methods: {
+            qrCode: {
+                enabled: { type: Boolean, default: false },
+                imageUrl: String,
+                promptPayId: String
+            },
+            bankTransfer: {
+                enabled: { type: Boolean, default: false },
+                bank: String,
+                accountNumber: String,
+                accountName: String
+            }
+        }
+    },
+    // Notification Configuration
+    notificationSettings: {
+        email: {
+            enabled: { type: Boolean, default: true },
+            address: String
+        },
+        lineNotify: {
+            enabled: { type: Boolean, default: false },
+            token: String
+        },
+        webhook: {
+            enabled: { type: Boolean, default: false },
+            url: String,
+            secret: String
         }
     },
     createdAt: {

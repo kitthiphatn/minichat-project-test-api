@@ -28,55 +28,57 @@ export default function Sidebar({ user, workspace, onLogout, isOpen, onClose }) 
     };
 
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-colors duration-300">
+        <div className="flex flex-col h-full bg-white dark:bg-gray-950 border-r border-gray-100 dark:border-gray-800/50 transition-colors duration-300">
             {/* Mobile Close Button */}
             <button
                 onClick={onClose}
                 className="lg:hidden absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors z-50"
             >
-                <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             </button>
+
             {/* Logo */}
-            <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-200 dark:border-gray-800">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/30">
+            <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100 dark:border-gray-800/50">
+                <div className="w-9 h-9 bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
                     <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                    <h1 className="text-lg font-bold text-gray-900 dark:text-white">MiniChat</h1>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{t('sidebar.platform_subtitle')}</p>
+                    <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">MiniChat</h1>
+                    <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">{t('sidebar.platform_subtitle')}</p>
                 </div>
             </div>
 
             {/* Workspace Info */}
             {workspace && (
-                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('sidebar.workspace')}</p>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mt-1 truncate" title={workspace.name}>
+                <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800/50">
+                    <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">{t('sidebar.workspace')}</p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate" title={workspace.name}>
                         {workspace.name}
                     </p>
-                    <div className="mt-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">
+                    <div className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-500/20">
                         {workspace.plan || 'free'} {t('sidebar.plan')}
                     </div>
                 </div>
             )}
 
             {/* Navigation */}
-            <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+            <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
                 {navigation.map((item) => {
                     const isActive = pathname === item.href;
                     return (
                         <Link
                             key={item.href}
                             href={item.href}
+                            onClick={onClose}
                             className={`
-                                flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
+                                flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200
                                 ${isActive
-                                    ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                                    ? 'bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 shadow-sm border border-purple-100 dark:border-purple-500/20'
+                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'
                                 }
                             `}
                         >
-                            <item.icon className="w-5 h-5" />
+                            <item.icon className={`w-[18px] h-[18px] ${isActive ? 'text-purple-600 dark:text-purple-400' : ''}`} />
                             {item.name}
                         </Link>
                     );
@@ -84,45 +86,44 @@ export default function Sidebar({ user, workspace, onLogout, isOpen, onClose }) 
             </nav>
 
             {/* User Profile & Footer */}
-            <div className="border-t border-gray-200 dark:border-gray-800 p-4 space-y-3">
-                {/* Theme & Language Toggles Grid */}
+            <div className="border-t border-gray-100 dark:border-gray-800/50 p-4 space-y-3">
+                {/* Theme & Language Toggles */}
                 <div className="grid grid-cols-2 gap-2">
-                    {/* Theme Toggle */}
                     <button
                         onClick={toggleTheme}
-                        className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all border border-gray-200 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-500"
+                        className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all border border-gray-100 dark:border-gray-800 hover:border-purple-200 dark:hover:border-purple-500/30"
                         title={theme === 'dark' ? t('sidebar.theme_light') : t('sidebar.theme_dark')}
                     >
-                        {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                        {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
                         <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
                     </button>
 
-                    {/* Language Toggle */}
                     <button
                         onClick={toggleLanguage}
-                        className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all border border-gray-200 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-500"
+                        className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all border border-gray-100 dark:border-gray-800 hover:border-purple-200 dark:hover:border-purple-500/30"
                         title="Change Language"
                     >
-                        <Languages className="w-4 h-4" />
+                        <Languages className="w-3.5 h-3.5" />
                         <span>{language === 'en' ? 'EN' : 'TH'}</span>
                     </button>
                 </div>
 
+                {/* User Info */}
                 {user && (
-                    <div className="flex items-center gap-3 pt-1">
-                        <div className="w-9 h-9 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
+                    <div className="flex items-center gap-3 px-1 pt-1">
+                        <div className="w-9 h-9 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md shadow-purple-500/20 ring-2 ring-white dark:ring-gray-900">
                             {user.username?.[0]?.toUpperCase() || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{user.username}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+                            <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">{user.username}</p>
+                            <p className="text-[11px] text-gray-400 dark:text-gray-500 truncate">{user.email}</p>
                         </div>
                     </div>
                 )}
 
                 <button
                     onClick={onLogout}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all"
                 >
                     <LogOut className="w-4 h-4" />
                     {t('sidebar.logout')}

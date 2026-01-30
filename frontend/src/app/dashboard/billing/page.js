@@ -99,16 +99,16 @@ export default function BillingPage() {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="text-center mb-16">
-                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                <div className="text-center mb-12 md:mb-16">
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">
                         Choose Your Plan
                     </h1>
-                    <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    <p className="text-base md:text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
                         Start free and upgrade as you grow. No credit card required.
                     </p>
 
                     {/* Billing Period Toggle */}
-                    <div className="mt-8 inline-flex items-center bg-white dark:bg-gray-800 rounded-full p-1 shadow-lg">
+                    <div className="mt-6 md:mt-8 inline-flex items-center bg-white dark:bg-gray-900 rounded-full p-1 shadow-sm border border-gray-100 dark:border-gray-800/50">
                         <button
                             onClick={() => setBillingPeriod('monthly')}
                             className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${billingPeriod === 'monthly'
@@ -134,7 +134,7 @@ export default function BillingPage() {
                 </div>
 
                 {/* Pricing Cards */}
-                <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">
+                <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto mb-12 md:mb-16">
                     {plans.map((plan) => {
                         const Icon = plan.icon;
                         const isCurrentPlan = currentPlan === plan.name.toLowerCase();
@@ -145,7 +145,7 @@ export default function BillingPage() {
                         return (
                             <div
                                 key={plan.name}
-                                className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden transition-all hover:scale-105 ${plan.popular ? 'ring-4 ring-purple-500' : ''
+                                className={`relative bg-white dark:bg-gray-900 rounded-2xl shadow-sm border overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md ${plan.popular ? 'ring-2 ring-purple-500 border-purple-200 dark:border-purple-500/30' : 'border-gray-100 dark:border-gray-800/50'
                                     }`}
                             >
                                 {plan.popular && (
@@ -236,7 +236,7 @@ export default function BillingPage() {
                 </div>
 
                 {/* FAQ Section */}
-                <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+                <div className="max-w-3xl mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800/50 p-6 md:p-8">
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
                         Frequently Asked Questions
                     </h2>

@@ -28,19 +28,12 @@ app.use('/api/', generalLimiter);
 // Strict CORS
 const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',')
-    : ['http://localhost:3000'];
+    : ['http://localhost:3000', 'https://chat.clubfivem.com', 'https://api.clubfivem.com'];
 
 app.use(cors({
-    origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
-    },
+    origin: true, // Allow all origins (reflect request origin) for maximum compatibility during testing
     credentials: true,
+    exposedHeaders: ['Content-Disposition'],
 }));
 
 app.use(express.json());
@@ -74,6 +67,10 @@ app.use('/api/widget', require('./routes/widget'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/payment', require('./routes/payment'));
+app.use('/api/conversations', require('./routes/conversation'));
+app.use('/api/products', require('./routes/products'));
+app.use('/api/orders', require('./routes/orders'));
+app.use('/api/widget-config', require('./routes/widgetConfig'));
 
 // Serve uploaded files statically
 const path = require('path');
@@ -98,6 +95,16 @@ app.get('/', (req, res) => {
                 history: '/api/chat/history',
                 message: '/api/chat/message',
                 clear: '/api/chat/clear',
+            },
+            conversations: {
+                list: '/api/conversations',
+                stats: '/api/conversations/stats',
+                detail: '/api/conversations/:sessionId',
+                takeover: '/api/conversations/:sessionId/takeover',
+                end: '/api/conversations/:sessionId/end',
+                message: '/api/conversations/:sessionId/message',
+                resolve: '/api/conversations/:sessionId/resolve',
+                notes: '/api/conversations/:sessionId/notes',
             }
         },
     });
@@ -143,6 +150,11 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`   GET  /api/chat/providers    - Get available providers`);
     console.log(`   GET  /api/chat/history      - Get chat history`);
     console.log(`   POST /api/chat/message      - Send message`);
+    console.log(`   CONVERSATIONS:`);
+    console.log(`   GET  /api/conversations     - List conversations`);
+    console.log(`   GET  /api/conversations/stats - Get stats`);
+    console.log(`   POST /api/conversations/:id/takeover - Human takeover`);
+    console.log(`   POST /api/conversations/:id/message  - Send as human`);
     console.log('\n' + '='.repeat(60) + '\n');
 });
 

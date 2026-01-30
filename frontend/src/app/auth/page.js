@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, Github, ArrowRight, Loader2, AlertCircle, Eye, EyeOff, Hash, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Mail, Lock, User, Github, ArrowRight, Loader2, AlertCircle, Eye, EyeOff, Hash, ArrowLeft, CheckCircle, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -187,13 +187,22 @@ export default function AuthPage() {
     };
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-black selection:bg-purple-500/30">
+        <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-[#0a0a0f] selection:bg-purple-500/30">
             {/* Background Ambience */}
-            <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/10 md:bg-purple-600/20 blur-[80px] md:blur-[120px] pointer-events-none" />
-            <div className="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-600/10 md:bg-blue-600/20 blur-[80px] md:blur-[120px] pointer-events-none" />
+            <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/10 md:bg-purple-600/15 blur-[80px] md:blur-[120px] pointer-events-none" />
+            <div className="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-600/10 md:bg-indigo-600/15 blur-[80px] md:blur-[120px] pointer-events-none" />
+            <div className="fixed top-[40%] left-[40%] w-[30%] h-[30%] rounded-full bg-violet-600/5 blur-[100px] pointer-events-none" />
 
             <main className="relative z-10 w-full max-w-[420px] p-4 md:p-6">
-                <div className="backdrop-blur-xl md:backdrop-blur-2xl bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-2xl shadow-black/50 overflow-hidden relative min-h-[500px] flex flex-col justify-center">
+                {/* Branding */}
+                <div className="flex items-center justify-center gap-2.5 mb-6">
+                    <div className="w-9 h-9 bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
+                        <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-xl font-bold text-white tracking-tight">MiniChat</span>
+                </div>
+
+                <div className="backdrop-blur-xl md:backdrop-blur-2xl bg-white/[0.03] border border-white/[0.08] rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-2xl shadow-black/50 overflow-hidden relative min-h-[500px] flex flex-col justify-center">
 
                     <AnimatePresence mode="wait">
                         {/* VIEW 1: AUTH (LOGIN/SIGNUP) */}
@@ -400,6 +409,10 @@ export default function AuthPage() {
                         )}
                     </AnimatePresence>
                 </div>
+
+                <p className="text-center text-gray-600 text-[11px] mt-5 tracking-wide">
+                    AI-Powered Chat Platform
+                </p>
             </main>
         </div>
     );

@@ -130,6 +130,44 @@ const PinModal = ({ isOpen, onClose, onVerify, title = 'Security Verification', 
     );
 };
 
+// Status Modal for replacing native alerts
+const StatusModal = ({ isOpen, onClose, type = 'success', title, message }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fadeIn">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-sm border border-gray-200 dark:border-gray-700 transform scale-100 transition-all">
+                <div className="flex flex-col items-center text-center">
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${type === 'success'
+                        ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                        }`}>
+                        {type === 'success' ? <CheckCircle className="w-8 h-8" /> : <AlertTriangle className="w-8 h-8" />}
+                    </div>
+
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                        {title || (type === 'success' ? 'Success' : 'Error')}
+                    </h3>
+
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">
+                        {message}
+                    </p>
+
+                    <button
+                        onClick={onClose}
+                        className={`w-full py-3 rounded-xl font-medium text-white shadow-lg transition-all transform active:scale-95 ${type === 'success'
+                            ? 'bg-green-600 hover:bg-green-700 shadow-green-500/30'
+                            : 'bg-red-600 hover:bg-red-700 shadow-red-500/30'
+                            }`}
+                    >
+                        Okay, Got it
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export default function SettingsPage() {
     const [workspace, setWorkspace] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -175,6 +213,10 @@ export default function SettingsPage() {
     useEffect(() => {
         const workspaceData = getWorkspace();
         if (workspaceData) {
+            // Normalize ID: Ensure .id exists (backend might return _id)
+            if (!workspaceData.id && workspaceData._id) {
+                workspaceData.id = workspaceData._id;
+            }
             setWorkspace(workspaceData);
             setHasPin(!!workspaceData.settings?.security?.pin);
 
@@ -268,6 +310,9 @@ export default function SettingsPage() {
 
             if (response.data.success) {
                 const updatedWorkspace = response.data.workspace;
+                // Normalize ID for consistency
+                updatedWorkspace.id = updatedWorkspace._id || updatedWorkspace.id;
+
                 setWorkspace(updatedWorkspace);
                 localStorage.setItem('workspace', JSON.stringify(updatedWorkspace));
                 setSuccess(true);
@@ -327,13 +372,20 @@ export default function SettingsPage() {
         }
     };
 
+    // Status Modal State
+    const [statusModal, setStatusModal] = useState({ isOpen: false, type: 'success', title: '', message: '' });
+
+    const showAlert = (type, title, message) => {
+        setStatusModal({ isOpen: true, type, title, message });
+    };
+
     const handleSetPin = async () => {
         if (pinSetup.pin !== pinSetup.pinConfirm) {
-            alert("PINs do not match!");
+            showAlert('error', 'PIN Mismatch', 'The PINs you entered do not match. Please try again.');
             return;
         }
         if (pinSetup.pin.length !== formData.pinLength) {
-            alert(`PIN must be ${formData.pinLength} digits!`);
+            showAlert('error', 'Invalid Length', `PIN must be exactly ${formData.pinLength} digits long.`);
             return;
         }
 
@@ -344,11 +396,14 @@ export default function SettingsPage() {
                 { pin: pinSetup.pin },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            alert('Security PIN updated successfully!');
+
+            // Success Modal instead of Alert
+            showAlert('success', 'Security PIN Set', 'Your master PIN has been successfully updated. Please keep it safe!');
+
             setHasPin(true);
             setPinSetup({ pin: '', pinConfirm: '', isSetting: false });
         } catch (err) {
-            alert(err.response?.data?.error || 'Failed to set PIN');
+            showAlert('error', 'Update Failed', err.response?.data?.error || 'Failed to set PIN');
         }
     };
 
@@ -495,7 +550,7 @@ export default function SettingsPage() {
     ];
 
     return (
-        <div className="p-4 md:p-8 max-w-6xl mx-auto">
+        <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto">
             <PinModal
                 isOpen={pinModalOpen}
                 onClose={() => { setPinModalOpen(false); setPendingAction(null); }}
@@ -503,15 +558,23 @@ export default function SettingsPage() {
                 title={pendingAction === 'delete' ? 'Confirm Deletion' : 'Security Verification'}
             />
 
-            <div className="flex items-center justify-between mb-8">
+            <StatusModal
+                isOpen={statusModal.isOpen}
+                onClose={() => setStatusModal({ ...statusModal, isOpen: false })}
+                type={statusModal.type}
+                title={statusModal.title}
+                message={statusModal.message}
+            />
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Workspace Settings</h1>
-                    <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your workspace configuration</p>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Workspace Settings</h1>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm md:text-base">Manage your workspace configuration</p>
                 </div>
                 <button
                     onClick={handleSubmit}
                     disabled={loading}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all shadow-lg hover:shadow-purple-500/30 disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-purple-500/20 transition-all disabled:opacity-50 text-sm"
                 >
                     <Save className="w-4 h-4" />
                     {loading ? 'Saving...' : 'Save Changes'}
@@ -519,25 +582,25 @@ export default function SettingsPage() {
             </div>
 
             {success && (
-                <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center gap-2 text-green-800 dark:text-green-400">
+                <div className="mb-6 p-4 bg-green-50 dark:bg-green-500/10 border border-green-100 dark:border-green-500/20 rounded-xl flex items-center gap-2 text-green-700 dark:text-green-400 text-sm">
                     <AlertCircle className="w-5 h-5" />
                     <span className="font-medium">Settings saved successfully!</span>
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
                 {/* Sidebar Navigation */}
-                <div className="space-y-2">
+                <div className="flex md:flex-col gap-1.5 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => handleTabChange(tab.id)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${activeTab === tab.id
-                                ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all font-medium text-[13px] whitespace-nowrap ${activeTab === tab.id
+                                ? 'bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-100 dark:border-purple-500/20 shadow-sm'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                                 } ${tab.color || ''}`}
                         >
-                            <tab.icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-purple-600 dark:text-purple-400' : ''}`} />
+                            <tab.icon className={`w-[18px] h-[18px] ${activeTab === tab.id ? 'text-purple-600 dark:text-purple-400' : ''}`} />
                             {tab.label}
                         </button>
                     ))}
@@ -547,7 +610,7 @@ export default function SettingsPage() {
                 <div className="md:col-span-3 space-y-6">
                     {/* General Tab */}
                     {activeTab === 'general' && (
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 animate-fadeIn">
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 dark:border-gray-800/50 animate-fadeIn">
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                                 <Building2 className="w-5 h-5 text-gray-400" /> General Information
                             </h3>
@@ -635,7 +698,7 @@ export default function SettingsPage() {
 
                     {/* Notifications Tab */}
                     {activeTab === 'notifications' && (
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 animate-fadeIn">
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 dark:border-gray-800/50 animate-fadeIn">
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                                 <Bell className="w-5 h-5 text-gray-400" /> Notification Preferences
                             </h3>
@@ -696,7 +759,7 @@ export default function SettingsPage() {
                             {/* CONTENT (Conditional Render for F12 Protection: Only render if unlocked or no pin) */}
                             {(!hasPin || securityUnlocked) ? (
                                 <div className="space-y-6 animate-fadeIn">
-                                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                                    <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 dark:border-gray-800/50">
                                         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                                             <Shield className="w-6 h-6 text-purple-600" /> Security configuration
                                         </h3>
@@ -895,7 +958,7 @@ export default function SettingsPage() {
 
                     {/* Automation Tab */}
                     {activeTab === 'automation' && (
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 animate-fadeIn">
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 dark:border-gray-800/50 animate-fadeIn">
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                                 <Bot className="w-5 h-5 text-gray-400" /> Chat Automation
                             </h3>
