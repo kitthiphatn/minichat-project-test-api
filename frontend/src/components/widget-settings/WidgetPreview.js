@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send, Paperclip, Smile, Loader2, RotateCcw } from 'lucide-react';
+import { MessageCircle, X, Send, Paperclip, Smile, Loader2, RotateCcw, Star } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { sendMessage } from '@/lib/api';
 import axios from 'axios';
@@ -110,7 +110,10 @@ export default function WidgetPreview({ config, workspace }) {
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <MessageCircle className="w-6 h-6" />
+                                    <div className="relative flex items-center justify-center w-full h-full">
+                                        <MessageCircle className="w-6 h-6" />
+                                        <Star className="w-2.5 h-2.5 text-yellow-300 fill-yellow-300 absolute top-2 right-2 border-white rounded-full" />
+                                    </div>
                                 )}
                             </div>
                             <div>
@@ -262,7 +265,10 @@ export default function WidgetPreview({ config, workspace }) {
                             style={{ backgroundColor: styles.primaryColor }}
                             className="w-14 h-14 rounded-full shadow-lg shadow-blue-500/30 flex items-center justify-center text-white transform hover:scale-110 transition-all duration-300"
                         >
-                            <MessageCircle className="w-8 h-8" />
+                            <div className="relative">
+                                <MessageCircle className="w-8 h-8" />
+                                <Star className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300 absolute -top-1 -right-1" />
+                            </div>
                         </button>
                     </div>
                 )}

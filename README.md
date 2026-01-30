@@ -1,6 +1,6 @@
 # 🤖 Mini Chat Ollama
 
-A modern, full-stack chat application with support for multiple AI providers including Ollama, OpenRouter, Groq, and Anthropic. Built with Next.js 14, Express.js, and MongoDB.
+A modern, full-stack chat application and customer support platform. Features include a customizable chat widget, admin dashboard, live chat takeover, and multi-tier subscription plans. Built with Next.js 14, Express.js, and MongoDB.
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -38,9 +38,13 @@ A modern, full-stack chat application with support for multiple AI providers inc
 ### What Makes This Special?
 
 - **Multi-Provider Support**: Switch between 4 different AI providers seamlessly
+- **Admin Dashboard**: Full control over users, workspaces, and plans
+- **Live Chat Takeover**: Agents can pause the bot and chat with users in real-time
+- **Widget Customization**: Customizable chat widget with branding options
+- **Multi-Tier Plans**: Support for Free, Premium, and Business tiers
 - **Local-First**: Works with Ollama out of the box (no API keys needed)
 - **Production Ready**: Complete error handling, logging, and data persistence
-- **Well Documented**: 30KB+ of comprehensive documentation
+- **Well Documented**: Comprehensive guides and API documentation
 - **Easy Setup**: Automated setup script gets you running in minutes
 
 ### Project Context
@@ -55,9 +59,13 @@ This project was created as a technical interview assignment with the following 
 
 ## Features
 
-### ✅ Core Features (Required)
+### ✅ Core Features
 
 - **Single-page chat interface** - Clean, intuitive UI
+- **Embeddable Chat Widget** - Easy integration for any website
+- **Admin Dashboard** - Manage users, workspaces, and logs
+- **Plan Management** - Free, Premium (299 THB), and Business (999 THB) tiers
+- **Live Chat System** - Real-time agent takeover capabilities
 - **Send/receive messages from AI** - Real-time communication
 - **Message history in MongoDB** - Persistent storage
 - **User/AI message distinction** - Different styling for clarity

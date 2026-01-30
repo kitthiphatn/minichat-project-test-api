@@ -680,4 +680,88 @@ router.post('/:id/faqs/import', protect, upload.single('file'), async (req, res)
     }
 });
 
+// @desc    [ADMIN] Update Workspace Plan
+// @route   PUT /api/workspaces/:id/plan
+// @access  Private (Admin Only)
+router.put('/:id/plan', protect, async (req, res) => {
+    try {
+        // 1. Verify Admin Role
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, error: 'Not authorized. Admin access required.' });
+        }
+
+        const { plan } = req.body;
+        const validPlans = ['free', 'starter', 'pro', 'business'];
+
+        if (!plan || !validPlans.includes(plan)) {
+            return res.status(400).json({
+                success: false,
+                error: `Invalid plan. Must be one of: ${validPlans.join(', ')}`
+            });
+        }
+
+        // 2. Find and Update Workspace (Any workspace, since we are admin)
+        const workspace = await Workspace.findById(req.params.id);
+
+        if (!workspace) {
+            return res.status(404).json({ success: false, error: 'Workspace not found' });
+        }
+
+        workspace.plan = plan;
+        await workspace.save();
+
+        console.log(`[ADMIN] Workspace ${workspace._id} plan updated to ${plan} by ${req.user.email}`);
+
+        res.json({
+            success: true,
+            message: `Workspace plan updated to ${plan}`,
+            plan: workspace.plan
+        });
+
+    } catch (error) {
+        console.error('Admin Plan Update Error:', error);
+        res.status(500).json({ success: false, error: 'Server Error' });
+    }
+});
+
+// @desc    [ADMIN] Bulk Update Workspace Plans
+// @route   PUT /api/workspaces/bulk/plan
+// @access  Private (Admin Only)
+router.put('/bulk/plan', protect, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, error: 'Not authorized' });
+        }
+
+        const { userIds, plan } = req.body;
+        const validPlans = ['free', 'starter', 'pro', 'business'];
+
+        if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+            return res.status(400).json({ success: false, error: 'No users selected' });
+        }
+
+        if (!plan || !validPlans.includes(plan)) {
+            return res.status(400).json({ success: false, error: 'Invalid plan' });
+        }
+
+        // Update all workspaces owned by these users
+        const result = await Workspace.updateMany(
+            { owner: { $in: userIds } },
+            { $set: { plan: plan } }
+        );
+
+        console.log(`[ADMIN] Bulk plan update to ${plan} for ${result.modifiedCount} workspaces by ${req.user.email}`);
+
+        res.json({
+            success: true,
+            message: `Updated plan to ${plan} for ${result.modifiedCount} workspaces`,
+            modifiedCount: result.modifiedCount
+        });
+
+    } catch (error) {
+        console.error('Bulk Plan Update Error:', error);
+        res.status(500).json({ success: false, error: 'Server Error' });
+    }
+});
+
 module.exports = router;

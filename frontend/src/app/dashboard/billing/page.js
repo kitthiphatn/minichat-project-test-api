@@ -38,7 +38,7 @@ const plans = [
         name: 'Premium',
         price: 299,
         period: 'month',
-        description: 'For serious businesses',
+        description: 'For small businesses',
         icon: Crown,
         color: 'purple',
         features: [
@@ -51,12 +51,32 @@ const plans = [
             { name: 'Human Handoff', included: true },
             { name: 'Custom Domain', included: true },
             { name: 'Priority Support (24/7)', included: true },
-            { name: 'Advanced AI Models (GPT-4, Claude)', included: true },
-            { name: 'API Access', included: true },
-            { name: 'White Label Option', included: true },
+            { name: 'Advanced AI Models (Gemini Flash)', included: true },
+            { name: 'API Access', included: false },
+            { name: 'White Label Option', included: false },
         ],
-        cta: 'Upgrade Now',
+        cta: 'Upgrade to Premium',
         popular: true
+    },
+    {
+        name: 'Business',
+        price: 999,
+        period: 'month',
+        description: 'For agencies & large teams',
+        icon: Shield,
+        color: 'indigo',
+        features: [
+            { name: 'Everything in Premium', included: true },
+            { name: 'Unlimited Workspaces', included: true },
+            { name: 'Unlimited Team Members', included: true },
+            { name: 'Full White Label (No Branding)', included: true },
+            { name: 'Advanced Model (Gemini Pro 1.5)', included: true },
+            { name: 'Audit Logs & API Access', included: true },
+            { name: 'Account Manager Support', included: true },
+            { name: 'SLA 99.9% Uptime', included: true },
+        ],
+        cta: 'Contact Sales / Upgrade',
+        popular: false
     }
 ];
 
@@ -134,7 +154,7 @@ export default function BillingPage() {
                 </div>
 
                 {/* Pricing Cards */}
-                <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto mb-12 md:mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto mb-12 md:mb-16">
                     {plans.map((plan) => {
                         const Icon = plan.icon;
                         const isCurrentPlan = currentPlan === plan.name.toLowerCase();

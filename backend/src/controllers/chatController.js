@@ -300,7 +300,7 @@ exports.sendMessage = async (req, res) => {
     try {
         // Check for session ID or API Key
         const sessionId = req.headers['x-session-id'];
-        const { message, provider = 'groq', model = 'llama-3.1-8b-instant', apiKey } = req.body;
+        let { message, provider, model, apiKey, workspaceId } = req.body;
 
         // Verify authentication (Session ID or API Key)
         if (!sessionId && !apiKey) {
@@ -316,46 +316,94 @@ exports.sendMessage = async (req, res) => {
             return res.status(400).json({ error: 'Message must be less than 5000 characters' });
         }
 
-        if (!PROVIDERS[provider]) {
-            return res.status(400).json({ error: 'Invalid provider' });
-        }
-
-        // Save user message (only if session ID exists)
-        let userMessage;
-        if (sessionId) {
-            userMessage = await Message.create({
-                role: 'user',
-                content: message,
-                provider,
-                model,
-                sessionId,
-            });
-            console.log(`[INFO] User message saved: ${message.substring(0, 50)}...`);
-        }
-
-        // Find or create conversation
-        let conversation = null;
-        if (sessionId && req.body.workspaceId) {
-            conversation = await Conversation.findOrCreate(sessionId, req.body.workspaceId);
-            await conversation.updateActivity();
-        }
-
-        // Fetch Workspace Context (Critical for RAG/Context Injection)
-        // If not attached, fetch it.
-        if (!req.workspace && req.body.workspaceId) {
+        // --- FETCH WORKSPACE CONTEXT FIRST ---
+        if (!req.workspace && workspaceId) {
             try {
-                req.workspace = await Workspace.findById(req.body.workspaceId);
+                req.workspace = await Workspace.findById(workspaceId);
             } catch (err) {
                 console.error('Failed to fetch workspace context:', err);
             }
         }
 
+        // --- PLAN ENFORCEMENT & SETTINGS ---
+        let effectiveProvider = 'groq'; // Default for Free
+        let effectiveModel = 'llama-3.1-8b-instant';
+        let historyLimit = 5;
+        let delayMs = 3000;
+
+        if (req.workspace) {
+            const plan = req.workspace.plan || 'free';
+            const userRole = req.user ? req.user.role : 'user';
+
+            if (userRole === 'admin') {
+                // ADMIN OVERRIDE
+                console.log(`[INFO] Admin Request. Using Business Plan features.`);
+                effectiveProvider = 'gemini';
+                effectiveModel = 'gemini-1.5-pro';
+                historyLimit = 50;
+                delayMs = 0;
+            } else if (plan === 'business') {
+                // BUSINESS TIER
+                console.log(`[INFO] Business Plan detected. Using Gemini 1.5 Pro.`);
+                effectiveProvider = 'gemini';
+                effectiveModel = 'gemini-1.5-pro';
+                historyLimit = 50; // Max context
+                delayMs = 0;
+            } else if (['pro', 'premium', 'starter'].includes(plan)) {
+                // PREMIUM TIER
+                console.log(`[INFO] Premium Plan detected. Using Gemini 1.5 Flash.`);
+                effectiveProvider = 'gemini';
+                effectiveModel = 'gemini-1.5-flash';
+                historyLimit = 20;
+                delayMs = 0;
+            } else {
+                // FREE TIER
+                console.log(`[INFO] Free Tier. Using Llama 3.`);
+                effectiveProvider = 'groq';
+                effectiveModel = 'llama-3.1-8b-instant';
+                historyLimit = 5;
+                delayMs = 3000;
+            }
+
+            // Allow provider override for PAID plans only if needed, but default is set above
+            if (plan !== 'free' && provider && PROVIDERS[provider]) {
+                // effectiveProvider = provider; // Optional: Uncomment to allow user override
+                // if (model) effectiveModel = model;
+            }
+        }
+
+        // Update local vars for downstream use
+        provider = effectiveProvider;
+        model = effectiveModel;
+
+        if (!PROVIDERS[provider] && provider !== 'gemini') {
+            return res.status(400).json({ error: 'Invalid provider' });
+        }
+
+        // --- SAVE USER MESSAGE ---
+        let userMessage;
+        if (sessionId) {
+            userMessage = await Message.create({
+                role: 'user',
+                content: message,
+                provider, // Save actual used provider
+                model,    // Save actual used model
+                sessionId,
+            });
+            console.log(`[INFO] User message saved: ${message.substring(0, 50)}... [Provider: ${provider}]`);
+        }
+
+        // Find or create conversation
+        let conversation = null;
+        if (sessionId && workspaceId) {
+            conversation = await Conversation.findOrCreate(sessionId, workspaceId);
+            await conversation.updateActivity();
+        }
+
         // --- CHECK MODE (HUMAN/PASSIVE) ---
-        // 1. Human Mode: Bot SHOULD NOT REPLY (unless it's a system message or we force it, but generally silent)
+        // 1. Human Mode
         if (conversation && conversation.mode === 'human' && conversation.botPaused) {
             console.log(`[INFO] Conversation ${sessionId} is in human mode, bot is paused`);
-
-            // If Socket.IO is available, notify the human agent
             if (req.io && conversation.assignedTo) {
                 req.io.to(`user_${conversation.assignedTo}`).emit('customer_message', {
                     sessionId: sessionId,
@@ -364,11 +412,9 @@ exports.sendMessage = async (req, res) => {
                     userMessage: userMessage ? userMessage.toResponse() : null
                 });
             }
-
-            // Return success but NO AI MESSAGE
             return res.json({
                 success: true,
-                message: null, // No AI response
+                message: null,
                 userMessage: userMessage ? userMessage.toResponse() : null,
                 aiMessage: null,
                 conversationMode: 'human',
@@ -376,7 +422,7 @@ exports.sendMessage = async (req, res) => {
             });
         }
 
-        // 2. Passive Bot Mode: Bot matches ONLY specific intents (e.g. Help / ? question)
+        // 2. Passive Bot Mode
         if (conversation && conversation.botMode === 'passive') {
             const isQuestion = message.includes('?') ||
                 message.toLowerCase().includes('help') ||
@@ -384,8 +430,6 @@ exports.sendMessage = async (req, res) => {
                 message.toLowerCase().includes('สอบถาม');
 
             if (!isQuestion) {
-                // Determine if we should wake up based on strict intent?
-                // For now, if not a question, stay silent.
                 console.log(`[INFO] Bot is passive. Ignoring non-question: "${message}"`);
                 return res.json({
                     success: true,
@@ -396,14 +440,11 @@ exports.sendMessage = async (req, res) => {
                     note: 'Bot is in passive mode. Ignored non-question.'
                 });
             }
-
-            // If it IS a question, re-activate the bot? Or just answer once?
-            // "activateBot" sets mode='bot' and botMode='active'.
-            // Let's activate it so it continues the conversation naturally.
             console.log(`[INFO] Bot passive mode activated by question: "${message}"`);
             await conversation.activateBot();
-            // Fallthrough to normal LLM logic...
         }
+
+
 
         // --- CONTEXT BUILDER ---
         const buildSystemContext = (workspace) => {
@@ -447,7 +488,7 @@ exports.sendMessage = async (req, res) => {
                 const activeProducts = workspace.productCatalog.products
                     .filter(p => p.isActive)
                     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                    .slice(0, 20); // Limit to 20 products
+                    .slice(0, 10); // Limit to 10 products (Optimized for Free Tier)
 
                 const currency = workspace.settings.currency || 'THB';
 
@@ -624,7 +665,16 @@ exports.sendMessage = async (req, res) => {
 
         // --- LLM CALL ---
 
-        const history = sessionId ? await Message.getChatHistory(sessionId, 10) : [];
+        // --- LLM CALL ---
+
+        // RATE LIMIT & LATENCY CONTROL
+        // Use dynamic delay based on plan (Free vs Pro)
+        if (sessionId && delayMs > 0) {
+            console.log(`[INFO] Optimization: Adding ${delayMs}ms delay to throttle interaction rate...`);
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+
+        const history = sessionId ? await Message.getChatHistory(sessionId, historyLimit) : [];
         let formattedMessages = history.map(msg => ({
             role: msg.role === 'ai' ? 'assistant' : 'user',
             content: msg.content,
@@ -677,6 +727,7 @@ ${workspaceContext}
                 case 'openrouter': aiResponse = await callOpenRouter(formattedMessages, model); break;
                 case 'groq': aiResponse = await callGroq(formattedMessages, model); break;
                 case 'anthropic': aiResponse = await callAnthropic(formattedMessages, model); break;
+                case 'gemini': aiResponse = await callGemini(formattedMessages, model); break;
                 default: throw new Error('Invalid provider');
             }
 
@@ -733,6 +784,64 @@ ${workspaceContext}
     } catch (error) {
         console.error('[ERROR] Failed to send message:', error);
         res.status(500).json({ error: 'Failed to send message' });
+    }
+};
+
+// --- GEMINI HANDLER ---
+const callGemini = async (messages, model = 'gemini-1.5-flash') => {
+    const start = Date.now();
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) throw new Error('GEMINI_API_KEY not found in environment variables');
+
+    // Convert messages to Gemini format
+    // Gemini expects: usage of "user" and "model" roles. System instructions are separate in beta, 
+    // but for simple chat, we can prepend system prompt to first user message or use v1beta systemInstruction.
+    // Let's use the v1beta API which supports systemInstruction.
+
+    // Extract system message
+    const systemMessage = messages.find(m => m.role === 'system');
+    const chatMessages = messages.filter(m => m.role !== 'system');
+
+    const contents = chatMessages.map(msg => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+    }));
+
+    const payload = {
+        contents: contents,
+        generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 1000,
+        }
+    };
+
+    if (systemMessage) {
+        payload.systemInstruction = {
+            parts: [{ text: systemMessage.content }]
+        };
+    }
+
+    try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const response = await axios.post(url, payload, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.data.candidates && response.data.candidates.length > 0) {
+            const content = response.data.candidates[0].content.parts[0].text;
+            return {
+                content: content,
+                model: model,
+                provider: 'gemini',
+                responseTime: Date.now() - start
+            };
+        } else {
+            throw new Error('No candidates returned from Gemini API');
+        }
+    } catch (error) {
+        console.error('[ERROR] Gemini API Error:', error.response?.data || error.message);
+        throw new Error(`Gemini Error: ${error.response?.data?.error?.message || error.message}`);
     }
 };
 

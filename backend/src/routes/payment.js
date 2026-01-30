@@ -14,7 +14,7 @@ router.post('/checkout', protect, async (req, res) => {
     try {
         const { plan, billingPeriod } = req.body;
 
-        if (!['free', 'premium'].includes(plan)) {
+        if (!['free', 'premium', 'business'].includes(plan)) {
             return res.status(400).json({ success: false, message: 'Invalid plan' });
         }
 
@@ -26,7 +26,9 @@ router.post('/checkout', protect, async (req, res) => {
         // Mock Pricing Logic
         let amount = 0;
         if (plan === 'premium') {
-            amount = billingPeriod === 'yearly' ? 2990 : 299; // Mock THB prices
+            amount = billingPeriod === 'yearly' ? 2990 : 299;
+        } else if (plan === 'business') {
+            amount = billingPeriod === 'yearly' ? 9990 : 999;
         }
 
         // Create pending transaction

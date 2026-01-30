@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, MessageSquare, Settings, CreditCard, LogOut, Sparkles, Sun, Moon, Languages, X, Shield } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, Settings, CreditCard, LogOut, Sparkles, Sun, Moon, Languages, X, Shield, Star } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -39,8 +39,9 @@ export default function Sidebar({ user, workspace, onLogout, isOpen, onClose }) 
 
             {/* Logo */}
             <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100 dark:border-gray-800/50">
-                <div className="w-9 h-9 bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
-                    <Sparkles className="w-5 h-5 text-white" />
+                <div className="w-9 h-9 bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20 relative">
+                    <MessageSquare className="w-5 h-5 text-white fill-white/20" />
+                    <Star className="w-2.5 h-2.5 text-yellow-300 fill-yellow-300 absolute top-1.5 right-1.5" />
                 </div>
                 <div>
                     <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">MiniChat</h1>
